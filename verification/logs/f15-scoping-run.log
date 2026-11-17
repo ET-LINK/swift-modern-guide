@@ -1,7 +1,7 @@
 # sample: f15-scoping-run
 # feature: F15 (Swift Testing TestScoping（自定义 setup/teardown trait）)
 # kind: after | mode: package-test | toolchain: swift-6.2
-# started: 2026-11-17T13:23:38.761Z finished: 2026-11-17T13:23:39.230Z
+# started: 2026-11-17T13:46:38.117Z finished: 2026-11-17T13:46:38.823Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # expectations:
 #   expect: pass
@@ -19,9 +19,10 @@ after: released
 ✔ Test run with 1 test in 0 suites passed after 0.001 seconds.
 
 --- stderr ---
+[0/1] Planning build
 Building for debugging...
 [0/2] Write swift-version--7C7DF2BDD5441AFA.txt
-Build complete! (0.10s)
+Build complete! (0.15s)
 
 --- end ---
 exit: 0

@@ -1,7 +1,7 @@
 # sample: f23-after-typecheck
 # feature: F23 (Escaped identifiers / raw identifiers)
 # kind: after | mode: typecheck | toolchain: swift-6.2
-# started: 2026-11-17T13:23:43.242Z finished: 2026-11-17T13:23:43.331Z
+# started: 2026-11-17T13:46:48.041Z finished: 2026-11-17T13:46:48.136Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f23/after.swift sha256=8cc9138293d6b4d85c7b98c8d1681f0c47d6aabe06e2f909d943437a81e3d179
 # expectations:

@@ -1,7 +1,7 @@
 # sample: f11-after-typecheck
 # feature: F11 (nonisolated 用于类型与 extension（阻断全局主体推断）)
 # kind: after | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:23:23.329Z finished: 2026-11-17T13:23:23.432Z
+# started: 2026-11-17T13:46:22.179Z finished: 2026-11-17T13:46:22.292Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f11/after.swift sha256=209c6c343db29996deb4aee342ec5a51fed88d730aef8a3f07d325ca18f3379e
 # expectations:

@@ -21,6 +21,14 @@ const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
     <li>勘误两则常见误传：<code>~Copyable</code>（SE-0390）首发于 Swift <strong>5.9</strong>，Swift 6.0 新增的是 noncopyable generics（SE-0427）；「新 App 默认 MainActor」是 Xcode 26 项目模板的构建设置，不是编译器对所有模块的默认（见 F18）。</li>
   </ul>
 
+  <h2>版本口径</h2>
+  <p>
+    首页版本筛选的语义是<strong>「相关版本」</strong>：一个筛选版本下出现某张卡片，
+    表示官方来源能背书「该特性在这个版本有可用性、首发或被实质性扩展/改进」——
+    卡片与文章页上的「首版 X」徽章标注真正的首发，「扩展于 Y」徽章标注后续扩展，
+    二者不混用。若某版本筛选下没有任何官方依据的相关变化，那张卡片就不会出现。
+  </p>
+
   <h2>验证口径</h2>
   <ul>
     <li>三套工具链：Swift 6.2（6.0–6.2 特性）、6.3.3（6.3 特性）、6.4.2（6.4 特性），全部在 Ubuntu 24.04 x86_64 host 上解压安装。</li>

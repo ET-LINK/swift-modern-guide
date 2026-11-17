@@ -1,7 +1,7 @@
 # sample: f11-broken-crossing
 # feature: F11 (nonisolated 用于类型与 extension（阻断全局主体推断）)
 # kind: broken | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:23:23.561Z finished: 2026-11-17T13:23:23.639Z
+# started: 2026-11-17T13:46:22.432Z finished: 2026-11-17T13:46:22.513Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f11/broken.swift sha256=77f3b7ac549c1f18e907b0776d72695db0800c0cedff15bdd02353973d4cc835
 # expectations:

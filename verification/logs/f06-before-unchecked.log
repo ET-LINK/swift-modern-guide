@@ -1,7 +1,7 @@
 # sample: f06-before-unchecked
 # feature: F06 (sending 参数与结果)
 # kind: before | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:23:19.382Z finished: 2026-11-17T13:23:19.459Z
+# started: 2026-11-17T13:46:17.640Z finished: 2026-11-17T13:46:17.718Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f06/before.swift sha256=f9aebb00619a98291d74fae792aede96e709f3ed49a427efe4373dbf34ca94b5
 # expectations:

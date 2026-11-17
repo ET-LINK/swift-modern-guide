@@ -1,7 +1,7 @@
 # sample: f18-after-default-isolation
 # feature: F18 (Default MainActor isolation（-default-isolation）)
 # kind: after | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:23:40.571Z finished: 2026-11-17T13:23:40.655Z
+# started: 2026-11-17T13:46:45.124Z finished: 2026-11-17T13:46:45.213Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f18/after.swift sha256=c47e02314f2a9b6b2d11caef249865122c690570aeaf2f0f8c78d763c25e666f
 # expectations:

@@ -1,7 +1,7 @@
 # sample: f20-broken-count-mismatch
 # feature: F20 (InlineArray 与 [N of T] 语法糖)
 # kind: broken | mode: typecheck | toolchain: swift-6.2
-# started: 2026-11-17T13:23:41.665Z finished: 2026-11-17T13:23:41.738Z
+# started: 2026-11-17T13:46:46.343Z finished: 2026-11-17T13:46:46.431Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f20/broken.swift sha256=179b40f0f36d5850bc2ed665c40b513153be162f59e3aae118949efe6769a3c7
 # expectations:

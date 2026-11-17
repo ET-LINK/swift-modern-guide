@@ -6,11 +6,14 @@ interface Props {
   description?: string;
 }
 const { title, description = 'Swift 6.x 现代语言特性学习站：覆盖 6.0 → 6.4，示例经本机多工具链编译验证。' } = Astro.props;
-const rawBase = Astro.site ? Astro.site.pathname : '/';
-const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+// base 一律取 import.meta.env.BASE_URL（构建时由 astro.config 的 base 注入，
+// 值为 /swift-modern-guide；Astro.site.pathname 只是站点根，不含 base，勿用——
+// 用它会把全站 href 拼成 protocol-relative 的 //features/，点击即错误页）。
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
 const currentPath = Astro.url.pathname;
 const navItems = [
-  { href: `${base}`, label: '首页' },
+  { href: `${base}/`, label: '首页' },
   { href: `${base}/features/`, label: '特性' },
   { href: `${base}/themes/concurrency/`, label: '主题' },
   { href: `${base}/migration/`, label: '迁移指南' },
@@ -18,9 +21,9 @@ const navItems = [
   { href: `${base}/about/`, label: '关于' },
 ];
 const isCurrent = (href: string) =>
-  href.endsWith('/') && href !== base
+  href.endsWith('/') && href !== `${base}/`
     ? currentPath.startsWith(href)
-    : currentPath === href || currentPath === base;
+    : currentPath === href || currentPath === `${base}/`;
 ---
 <!doctype html>
 <html lang="zh-CN" data-theme="light">
@@ -132,19 +135,24 @@ const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
       // 搜索：首次打开时才拉取索引（NFKC 归一化的中英文 substring 匹配）
       type IndexEntry = { slug: string; title: string; id: string; text: string; introduced: string };
       let searchIndex: IndexEntry[] | null = null;
-      let loaded = false;
+      let indexPromise: Promise<void> | null = null;
       function normalize(s: string) {
         return (s || '').normalize('NFKC').toLowerCase();
       }
-      async function ensureIndex() {
-        if (loaded) return;
-        loaded = true;
-        try {
-          const res = await fetch(`${base}search-index.json`);
-          searchIndex = await res.json();
-        } catch {
-          searchIndex = [];
+      // 缓存同一个 Promise：首个请求进行中时再次调用也会等到索引真正就绪，
+      // 调用方可以在 await 之后用当前关键词补渲染（修「索引加载中」竞态）。
+      function ensureIndex(): Promise<void> {
+        if (!indexPromise) {
+          indexPromise = (async () => {
+            try {
+              const res = await fetch(`${base}search-index.json`);
+              searchIndex = await res.json();
+            } catch {
+              searchIndex = [];
+            }
+          })();
         }
+        return indexPromise;
       }
       function openSearch() {
         dialog.showModal();

@@ -1,7 +1,7 @@
 # sample: f25-print-groups
 # feature: F25 (Diagnostic-group 告警控制)
 # kind: after | mode: typecheck | toolchain: swift-6.2
-# started: 2026-11-17T13:23:44.063Z finished: 2026-11-17T13:23:44.137Z
+# started: 2026-11-17T13:46:48.954Z finished: 2026-11-17T13:46:49.039Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f25/warning.swift sha256=d001d256e037952dc43f09981c001c68138330bbb930b597f681ac29ab40fbb9
 # expectations:

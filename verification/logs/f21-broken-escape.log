@@ -1,7 +1,7 @@
 # sample: f21-broken-escape
 # feature: F21 (Span 与标准库 .span 视图)
 # kind: broken | mode: typecheck | toolchain: swift-6.2
-# started: 2026-11-17T13:23:42.384Z finished: 2026-11-17T13:23:42.460Z
+# started: 2026-11-17T13:46:47.123Z finished: 2026-11-17T13:46:47.210Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f21/broken.swift sha256=2eef7aa11ca4000e5aeab9b670883c13900f33f04b3e1d0d47350a8f4e86eb68
 # expectations:

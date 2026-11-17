@@ -1,7 +1,7 @@
 # sample: f01-before-swift5
 # feature: F01 (Swift 6 language mode 与 data-race safety)
 # kind: before | mode: typecheck5 | toolchain: swift-6.2
-# started: 2026-11-17T13:23:16.326Z finished: 2026-11-17T13:23:16.409Z
+# started: 2026-11-17T13:46:14.524Z finished: 2026-11-17T13:46:14.610Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f01/before.swift sha256=7e2c1e674cc3a1956b8c3df7d922d62e019bf3aa870562f79df6b67ab13f5e00
 # expectations:

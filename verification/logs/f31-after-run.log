@@ -1,7 +1,7 @@
 # sample: f31-after-run
 # feature: F31 (defer 块中的 async 调用)
 # kind: after | mode: run-swift | toolchain: swift-6.4.2
-# started: 2026-11-17T13:23:48.395Z finished: 2026-11-17T13:23:48.533Z
+# started: 2026-11-17T13:46:54.494Z finished: 2026-11-17T13:46:54.636Z
 # swift --version: Swift version 6.4.2 (swift-6.4.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f31/after.swift sha256=a43045fcff28176db95f2c35541d9a2cfb08f78fa48fc0ceddf06230dc3000af
 # expectations:

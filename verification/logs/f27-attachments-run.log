@@ -1,30 +1,31 @@
 # sample: f27-attachments-run
 # feature: F27 (Swift Testing attachments)
 # kind: after | mode: package-test-attachments | toolchain: swift-6.2
-# started: 2026-11-17T13:23:45.736Z finished: 2026-11-17T13:23:46.173Z
+# started: 2026-11-17T13:46:51.243Z finished: 2026-11-17T13:46:52.040Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # expectations:
 #   expect: pass
 # ----
-$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift test --disable-xctest --attachments-path /tmp/multica-task-4124751358/smg-attach-r9fQHq
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift test --disable-xctest --attachments-path /tmp/multica-task-193273389/smg-attach-rP4XCu
 # step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f27/pkg | exit: 0
 --- stdout ---
 ◇ Test run started.
 ↳ Testing Library Version: 6.2 (3fdabe5392108d8)
 ↳ Target Platform: x86_64-unknown-linux-gnu
 debug value=1 source=checkpoint
-◇ Test debugByPrint() started.
 ◇ Test attachAndVerify() started.
 ⎙ Attached 'note.txt' to attachAndVerify().
-↳ Written to '/tmp/multica-task-4124751358/smg-attach-r9fQHq/note.txt'.
-✔ Test debugByPrint() passed after 0.001 seconds.
+↳ Written to '/tmp/multica-task-193273389/smg-attach-rP4XCu/note.txt'.
 ✔ Test attachAndVerify() passed after 0.001 seconds.
-✔ Test run with 2 tests in 0 suites passed after 0.001 seconds.
+◇ Test debugByPrint() started.
+✔ Test debugByPrint() passed after 0.001 seconds.
+✔ Test run with 2 tests in 0 suites passed after 0.002 seconds.
 
 --- stderr ---
+[0/1] Planning build
 Building for debugging...
 [0/2] Write swift-version--7C7DF2BDD5441AFA.txt
-Build complete! (0.10s)
+Build complete! (0.23s)
 
 --- end ---
 exit: 0

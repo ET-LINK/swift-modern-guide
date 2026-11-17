@@ -1,7 +1,7 @@
 # sample: f33-after-typecheck
 # feature: F33 (Optional some / any 语法糖)
 # kind: after | mode: typecheck | toolchain: swift-6.4.2
-# started: 2026-11-17T13:23:49.553Z finished: 2026-11-17T13:23:49.658Z
+# started: 2026-11-17T13:46:55.714Z finished: 2026-11-17T13:46:55.830Z
 # swift --version: Swift version 6.4.2 (swift-6.4.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f33/after.swift sha256=b3e1b39e797b4f5576252c04a6158d3fe7a0b0f5df6f82f764b372fe0d41cf5f
 # expectations:

@@ -1,20 +1,20 @@
 # sample: f32-before-detached
 # feature: F32 (Task cancellation shield)
 # kind: before | mode: compile-run6 | toolchain: swift-6.4.2
-# started: 2026-11-17T13:23:48.862Z finished: 2026-11-17T13:23:49.084Z
+# started: 2026-11-17T13:46:55.036Z finished: 2026-11-17T13:46:55.252Z
 # swift --version: Swift version 6.4.2 (swift-6.4.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f32/before.swift sha256=ce71c866414809dd9713277fe5f6b153b794ceb41030a3105f605f686426bb72
 # expectations:
 #   expect: pass
 # ----
-$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.4.2/usr/bin/swiftc -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f32/before.swift -o /tmp/multica-task-4124751358/smg-f32-before-detached-238492
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.4.2/usr/bin/swiftc -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f32/before.swift -o /tmp/multica-task-193273389/smg-f32-before-detached-271883
 # step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
 --- stdout ---
 (空)
 --- stderr ---
 (空)
 --- end ---
-$ /tmp/multica-task-4124751358/smg-f32-before-detached-238492
+$ /tmp/multica-task-193273389/smg-f32-before-detached-271883
 # step 2 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
 --- stdout ---
 cleanup start

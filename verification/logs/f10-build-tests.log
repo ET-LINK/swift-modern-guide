@@ -1,7 +1,7 @@
 # sample: f10-build-tests
 # feature: F10 (Swift Testing 入门与迁移)
 # kind: after | mode: package-build-tests | toolchain: swift-6.2
-# started: 2026-11-17T13:23:22.102Z finished: 2026-11-17T13:23:22.569Z
+# started: 2026-11-17T13:46:20.657Z finished: 2026-11-17T13:46:21.358Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # expectations:
 #   expect: pass
@@ -12,7 +12,7 @@ $ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322
 [0/1] Planning build
 Building for debugging...
 [0/2] Write swift-version--7C7DF2BDD5441AFA.txt
-Build complete! (0.15s)
+Build complete! (0.16s)
 
 --- stderr ---
 (空)

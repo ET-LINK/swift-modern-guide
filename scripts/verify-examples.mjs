@@ -328,37 +328,65 @@ if (listOnly) {
 }
 
 const wantedFeatures = argOnly === 'pilot' ? manifest.pilotFeatures : argOnly ? argOnly.split(',').map((s) => s.trim()) : null;
-fs.rmSync(path.join(LOG_DIR, 'results.json'), { force: true });
+const isPartial = !!wantedFeatures;
+const resultsPath = path.join(LOG_DIR, 'results.json');
+
+// 全量运行覆盖 results.json；部分运行（--only pilot / --only F01）合并进已有结果：
+// 只替换本次跑到的样本条目，其余保留——不允许 partial run 破坏已提交的验证状态。
 const results = [];
+if (isPartial && fs.existsSync(resultsPath)) {
+  try {
+    const prev = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+    results.push(...(prev.results ?? []));
+  } catch {
+    /* 旧的 results.json 损坏时按空集处理 */
+  }
+}
+if (!isPartial) fs.rmSync(resultsPath, { force: true });
 const targetFeatures = manifest.features.filter((f) => !wantedFeatures || wantedFeatures.includes(f.id));
+const ranIds = targetFeatures.flatMap((f) => f.samples.map((s) => s.id));
+for (let i = results.length - 1; i >= 0; i--) {
+  if (ranIds.includes(results[i].sampleId)) results.splice(i, 1);
+}
 for (const feature of targetFeatures) {
   for (const sample of feature.samples) {
     process.stdout.write(`▶ ${feature.id} ${sample.id} (${sample.mode}) ... `);
     const record = verifySample(sample, feature);
-    results.push(record);
+    results.push({
+      sampleId: record.sampleId,
+      featureId: record.featureId,
+      kind: record.kind,
+      mode: record.mode,
+      toolchainId: record.toolchainId,
+      expect: record.expect,
+      exit: record.exit,
+      status: record.status,
+      problems: record.problems,
+    });
     fs.writeFileSync(path.join(LOG_DIR, `${sample.id}.log`), renderLog(record, sample));
     console.log(record.status === 'pass' ? 'PASS' : `FAIL (${record.problems.join('; ')})`);
   }
 }
 const summary = {
   finishedAt: fmtDate(),
+  partialRun: isPartial ? (wantedFeatures ?? []) : false,
   toolchains: Object.fromEntries([...toolchainCache.entries()].map(([k, v]) => [k, { bin: v.bin, version: v.version.split('\n')[0] }])),
   samplesRun: results.length,
   passed: results.filter((r) => r.status === 'pass').length,
-  failed: results.filter((r) => r.status === 'fail').map((r) => ({ sampleId: r.sampleId, problems: r.problems })),
-  results: results.map((r) => ({
-    sampleId: r.sampleId,
-    featureId: r.featureId,
-    kind: r.kind,
-    mode: r.mode,
-    toolchainId: r.toolchainId,
-    expect: r.expect,
-    exit: r.exit,
-    status: r.status,
-    problems: r.problems,
-  })),
+  failed: results.filter((r) => r.status !== 'pass').map((r) => ({ sampleId: r.sampleId, problems: r.problems })),
+  results: results,
 };
 fs.writeFileSync(path.join(LOG_DIR, 'results.json'), JSON.stringify(summary, null, 2));
 
-console.log(`\n=== ${results.filter((r) => r.status === 'pass').length}/${results.length} PASS ===`);
-if (results.some((r) => r.status === 'fail')) process.exit(1);
+const ranRecords = targetFeatures.flatMap((f) => /* 本次真实执行的样本 */ f.samples.map(() => null)).length
+  ? results.filter((r) => ranIds.includes(r.sampleId))
+  : [];
+if (isPartial) {
+  console.log(
+    `\n=== 本次运行 ${ranRecords.filter((r) => r.status === 'pass').length}/${ranRecords.length} pass；` +
+      `合并后 results.json 共 ${results.length} 条、${results.filter((r) => r.status === 'pass').length} pass（--only 保留未触碰样本） ===`,
+  );
+} else {
+  console.log(`\n=== ${results.filter((r) => r.status === 'pass').length}/${results.length} PASS ===`);
+}
+if (results.some((r) => r.status !== 'pass')) process.exit(1);

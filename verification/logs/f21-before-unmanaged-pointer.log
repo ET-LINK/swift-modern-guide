@@ -1,7 +1,7 @@
 # sample: f21-before-unmanaged-pointer
 # feature: F21 (Span 与标准库 .span 视图)
 # kind: before | mode: run-swift | toolchain: swift-6.2
-# started: 2026-11-17T13:23:41.865Z finished: 2026-11-17T13:23:41.999Z
+# started: 2026-11-17T13:46:46.569Z finished: 2026-11-17T13:46:46.720Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f21/before.swift sha256=83231e5f2fc06585550f11b947aaf72dd0e722331d7f7c267a77cdf7b406502c
 # expectations:

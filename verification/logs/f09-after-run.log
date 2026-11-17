@@ -1,20 +1,20 @@
 # sample: f09-after-run
 # feature: F09 (Embedded Swift（实验性）)
 # kind: after | mode: embedded-run | toolchain: swift-6.2
-# started: 2026-11-17T13:23:21.586Z finished: 2026-11-17T13:23:21.962Z
+# started: 2026-11-17T13:46:20.145Z finished: 2026-11-17T13:46:20.533Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f09/after.swift sha256=a1e1390cc4dbf0c413ace5a1db28aee83d1f09e44fc275715c1dc35e6e294066
 # expectations:
 #   expect: pass
 # ----
-$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -swift-version 6 -enable-experimental-feature Embedded -wmo /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f09/after.swift -o /tmp/multica-task-4124751358/smg-f09-after-run-238492
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -swift-version 6 -enable-experimental-feature Embedded -wmo /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f09/after.swift -o /tmp/multica-task-193273389/smg-f09-after-run-271883
 # step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
 --- stdout ---
 (空)
 --- stderr ---
 (空)
 --- end ---
-$ /tmp/multica-task-4124751358/smg-f09-after-run-238492
+$ /tmp/multica-task-193273389/smg-f09-after-run-271883
 # step 2 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
 --- stdout ---
 embedded total=24

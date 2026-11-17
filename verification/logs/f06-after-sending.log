@@ -1,7 +1,7 @@
 # sample: f06-after-sending
 # feature: F06 (sending 参数与结果)
 # kind: after | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:23:19.585Z finished: 2026-11-17T13:23:19.677Z
+# started: 2026-11-17T13:46:17.845Z finished: 2026-11-17T13:46:17.927Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f06/after.swift sha256=4c8ae6aedb33e93e3f90383dd6e0ba8c4d1993819c762c22cdc2376153999b28
 # expectations:

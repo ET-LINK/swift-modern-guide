@@ -1,7 +1,7 @@
 # sample: f02-before-run
 # feature: F02 (Typed throws)
 # kind: before | mode: run-swift | toolchain: swift-6.2
-# started: 2026-11-17T13:23:16.984Z finished: 2026-11-17T13:23:17.129Z
+# started: 2026-11-17T13:46:15.213Z finished: 2026-11-17T13:46:15.367Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f02/before.swift sha256=b6236f949986c0acc6172e37695670f553778adb6985ca01296e896ad5da356d
 # expectations:

@@ -1,6 +1,26 @@
 import { test, expect } from '@playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const BASE = '/swift-modern-guide';
+
+function versionSetsFromFrontmatter(): Map<string, string[]> {
+  // 门禁的独立来源：期望集由 src/content/features 的 frontmatter 推导，
+  // 而不是照抄页面行为——dist 被篡改/漏构建时此断言必须转红。
+  const dir = path.resolve('src/content/features');
+  const out = new Map<string, string[]>();
+  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.mdx'))) {
+    const raw = fs.readFileSync(path.join(dir, f), 'utf8').split('---\n')[1] ?? '';
+    const id = /id:\s*(F\d{2})/.exec(raw)?.[1];
+    const versions = /versions:\s*\[([^\]]*)\]/.exec(raw)?.[1]
+      ?.split(',')
+      .map((x) => x.trim().replace(/['"]/g, ''))
+      .filter(Boolean);
+    if (id && versions) out.set(id, versions);
+  }
+  return out;
+}
+
 
 test.beforeEach(async ({ context }) => {
   // 阻断一切非本站请求：站点运行期不得依赖第三方域名
@@ -114,38 +134,48 @@ test.describe('搜索', () => {
 });
 
 test.describe('版本筛选', () => {
-  test('6.4 只显示 6.4 专属卡片；全部恢复', async ({ page }) => {
-    await page.goto(`${BASE}/`);
+  test('每个筛选版本的可见集合与 frontmatter 精确相等（缺失/多余都算失败）', async ({ page }) => {
+    const byId = versionSetsFromFrontmatter();
+    expect(byId.size).toBe(33);
     const allCards = page.locator('[data-versions]');
-    const total = await allCards.count();
-    expect(total).toBeGreaterThanOrEqual(33);
-    await page.click('.filter-bar button[data-version="6.4"]');
-    const visibleIds = await allCards.evaluateAll((els) =>
-      els.filter((e) => (e as HTMLElement).style.display !== 'none').map((e) => e.querySelector('.fc-id')?.textContent),
-    );
-    expect(visibleIds.length).toBeGreaterThan(0);
-    expect(visibleIds.length).toBeLessThan(total);
-    // 6.4 首发三条 + 版本数组里合法包含 6.4 的 F09（Embedded 在 6.4 有实质增强）
-    const expectable = ['F09', 'F31', 'F32', 'F33'];
-    for (const id of visibleIds) expect(expectable).toContain(id);
-    expect(visibleIds).toContain('F31');
+    await page.goto(`${BASE}/`);
+
+    for (const v of ['5.9', '6.0', '6.1', '6.2', '6.3', '6.4']) {
+      await page.click(`.filter-bar button[data-version="${v}"]`);
+      const expected = [...byId.entries()].filter(([, vs]) => vs.includes(v)).map(([id]) => id).sort();
+      const visible = (await allCards.evaluateAll((els) =>
+        els
+          .filter((e) => (e as HTMLElement).style.display !== 'none')
+          .map((e) => e.querySelector('.fc-id')?.textContent),
+      )).sort();
+      expect(visible, `筛选 ${v} 的可见集与 frontmatter 期望集不等`).toEqual(expected);
+      await expect(page.locator('.filter-count')).toContainText(`${expected.length} 个特性`);
+    }
+
+    // 「全部版本」恢复完整 33 张
     await page.click('.filter-bar button[data-version="all"]');
     const restored = await allCards.evaluateAll(
       (els) => els.filter((e) => (e as HTMLElement).style.display !== 'none').length,
     );
-    expect(restored).toBe(total);
+    expect(restored).toBe(33);
   });
 });
 
 test.describe('复制按钮', () => {
-  test('复制内容与源码一致', async ({ page }) => {
+  test('复制内容与 examples/f07/after.swift 源文件逐字一致（expected 取自源码，非 DOM 循环）', async ({ page }) => {
+    // 门禁目的：expected 必须来自 examples/ 源文件，页面 DOM 若已偏离源文件也要转红
+    const expected = fs.readFileSync('examples/f07/after.swift', 'utf8');
     await page.goto(`${BASE}/features/f07-mutex/`);
-    const block = page.locator('.code-block').first();
+    // 页面上 before 在前、after 在后：用 after 独有的 import Synchronization 定位
+    const block = page.locator('.code-block').filter({ hasText: 'import Synchronization' }).first();
     await expect(block).toBeVisible();
-    const expected = await block.evaluate((el) => el.querySelector('pre')?.textContent ?? '');
+    // 渲染组件会去掉源码末尾的空白（换行），断言口径 = 源文件去尾空白后逐字相等
+    const expectedTrimmed = expected.replace(/\s+$/, '');
+    const domText = await block.evaluate((el) => el.querySelector('pre')?.textContent ?? '');
+    expect(domText).toBe(expectedTrimmed);
     await block.locator('.copy-btn').click();
     const clipped = await page.evaluate(() => navigator.clipboard.readText());
-    expect(clipped).toBe(expected);
+    expect(clipped).toBe(expectedTrimmed);
   });
 });
 
@@ -179,5 +209,96 @@ test.describe('验证与日志链接', () => {
   test('404 页面存在', async ({ request }) => {
     const res = await request.get(`${BASE}/no-such-page/`);
     expect(res.status()).toBe(404);
+  });
+});
+
+
+test.describe('站内导航可点击（P0 门禁）', () => {
+  const navTargets = [
+    { sel: '.site-header .brand', label: 'brand' },
+    ...[
+      `${BASE}/features/`,
+      `${BASE}/themes/concurrency/`,
+      `${BASE}/migration/`,
+      `${BASE}/verification/`,
+      `${BASE}/about/`,
+      `${BASE}/`,
+    ].map((href) => ({ sel: `.site-header .nav-links a[href="${href}"]`, label: href })),
+    ...[
+      `${BASE}/about/`,
+      `${BASE}/verification/`,
+    ].map((href) => ({ sel: `.site-footer a[href="${href}"]`, label: `footer ${href}` })),
+  ];
+
+  test('header/footer/brand 的 href 一律以 /swift-modern-guide 开头且可点开', async ({ page }) => {
+    await page.goto(`${BASE}/features/f02-typed-throws/`);
+    for (const t of navTargets) {
+      const el = page.locator(t.sel).first();
+      await expect(el, `缺少导航元素 ${t.label}`).toBeVisible();
+      const href = await el.getAttribute('href');
+      expect(href, `${t.label} 的 href 不能是 protocol-relative`).toMatch(/^\/swift-modern-guide(\/|$)/);
+      expect(href ?? '', `${t.label} 不允许 // 前缀`).not.toMatch(/^\/\//);
+      const resp = await page.request.get(href!);
+      expect(resp.status(), `${t.label} 应 200`).toBe(200);
+    }
+  });
+
+  test('点击导航真实跳转（首页→迁移指南→验证总表）', async ({ page }) => {
+    await page.goto(`${BASE}/`);
+    await page.click('.site-header .nav-links a[href*="/migration/"]');
+    await page.waitForURL(`**${BASE}/migration/**`);
+    await expect(page.locator('h1')).toContainText('实操顺序');
+    await page.click('.site-header .nav-links a[href*="/verification/"]');
+    await page.waitForURL(`**${BASE}/verification/**`);
+    await expect(page.locator('h1')).toContainText('验证总表');
+    await page.click('.site-header .brand');
+    await page.waitForURL(`**${BASE}/`);
+    await expect(page.locator('h1')).toBeVisible();
+  });
+});
+
+test.describe('搜索慢索引竞态（P1 门禁）', () => {
+  test('索引延迟 1.5s 时，打开即输入也必须出结果（不需要第二次键入）', async ({ page }) => {
+    await page.route('**/search-index.json', async (route) => {
+      await new Promise((r) => setTimeout(r, 1500));
+      await route.continue();
+    });
+    await page.goto(`${BASE}/`);
+    await page.click('#search-open');
+    await page.fill('#search-input', '并发');
+    // 3 秒内必须由「加载完成后的补渲染」给出结果
+    await expect
+      .poll(async () => await page.locator('#search-results a').count(), { timeout: 3000 })
+      .toBeGreaterThan(0);
+  });
+});
+
+test.describe('顶栏触控目标（P2 门禁）', () => {
+  test('header 图标按钮 ≥ 44×44', async ({ page }) => {
+    await page.goto(`${BASE}/`);
+    for (const sel of ['#search-open', '#theme-toggle']) {
+      const box = await page.locator(sel).boundingBox();
+      expect(box, sel).toBeTruthy();
+      expect(Math.min(box!.width, box!.height), `${sel} 触控目标至少 44px`).toBeGreaterThanOrEqual(44);
+    }
+    const sizes = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('.filter-bar button')).map((b) => ({
+        w: b.getBoundingClientRect().width,
+        h: b.getBoundingClientRect().height,
+      })),
+    );
+    expect(sizes.length).toBeGreaterThan(0);
+    for (const s of sizes) expect(Math.min(s.w, s.h)).toBeGreaterThanOrEqual(44);
+  });
+});
+
+test.describe('F28 完整配置在页面可见（P2 门禁）', () => {
+  test('f28 页面展示的 dump 输出包含 "version" 行，与文案宣称一致', async ({ page }) => {
+    await page.goto(`${BASE}/features/f28-swift-format-effective-config/`);
+    const pre = page.locator('.verify-sample pre').first();
+    await expect(pre).toBeVisible();
+    const text = await pre.textContent();
+    expect(text ?? '').toContain('"version"');
+    expect(text ?? '').toContain('"fileScopedDeclarationPrivacy"');
   });
 });

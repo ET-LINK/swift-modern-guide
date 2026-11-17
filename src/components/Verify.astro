@@ -52,7 +52,7 @@ function excerpt(logName: string): string {
       continue;
     }
     if (eating) interesting.push(line);
-    if (interesting.length > 64) break;
+    if (interesting.length > 140) break;
   }
   return interesting.join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }

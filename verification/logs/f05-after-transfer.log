@@ -1,7 +1,7 @@
 # sample: f05-after-transfer
 # feature: F05 (Region-based isolation)
 # kind: after | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:23:18.923Z finished: 2026-11-17T13:23:19.006Z
+# started: 2026-11-17T13:46:17.142Z finished: 2026-11-17T13:46:17.221Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f05/after.swift sha256=f78e117db237872fa809e49227528974124f0951926ed8076bd926a091baaeb6
 # expectations:

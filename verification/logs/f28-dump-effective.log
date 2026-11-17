@@ -1,7 +1,7 @@
 # sample: f28-dump-effective
 # feature: F28 (swift-format 有效配置查看（--effective）)
 # kind: after | mode: format-dump | toolchain: swift-6.2
-# started: 2026-11-17T13:23:46.298Z finished: 2026-11-17T13:23:46.315Z
+# started: 2026-11-17T13:46:52.180Z finished: 2026-11-17T13:46:52.198Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # expectations:
 #   expect: pass

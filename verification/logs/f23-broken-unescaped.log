@@ -1,7 +1,7 @@
 # sample: f23-broken-unescaped
 # feature: F23 (Escaped identifiers / raw identifiers)
 # kind: broken | mode: typecheck | toolchain: swift-6.2
-# started: 2026-11-17T13:23:43.457Z finished: 2026-11-17T13:23:43.533Z
+# started: 2026-11-17T13:46:48.271Z finished: 2026-11-17T13:46:48.352Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f23/broken.swift sha256=5d31be9925b2043ec9ec935d0c6be12559651fb6b428576e8d82d9a1d7792509
 # expectations:

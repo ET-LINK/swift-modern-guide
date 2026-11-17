@@ -24,11 +24,15 @@ const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
     共 {features.length} 条特性，全部示例经本机多套工具链（6.2 / 6.3.3 / 6.4.2）真实编译验证。
   </p>
 
-  <div class="filter-bar" role="group" aria-label="按版本筛选">
+  <div class="filter-bar" role="group" aria-label="按相关版本筛选">
+    <!-- 「相关版本」口径：含首发与官方发布说明背书的后续增强节点；首版见卡片徽章。 -->
     <button data-version="all" aria-pressed="true">全部版本</button>
     {versionOrder.map((v) => <button data-version={v} aria-pressed="false">{v}</button>)}
     <span class="filter-count">{features.length} 个特性</span>
   </div>
+  <p style="margin:0;color:var(--fg-faint);font-size:12.5px">
+    筛选语义为「相关版本」：含首发与官方背书的后续增强节点；每张卡片的「首版」徽章标注真正的首发。
+  </p>
 
   <div class="timeline">
     {releases.map((rel) => (

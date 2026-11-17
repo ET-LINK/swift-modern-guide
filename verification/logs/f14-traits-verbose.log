@@ -1,12 +1,12 @@
 # sample: f14-traits-verbose
 # feature: F14 (SwiftPM package traits)
 # kind: after | mode: package-build-run | toolchain: swift-6.2
-# started: 2026-11-17T13:23:27.914Z finished: 2026-11-17T13:23:31.261Z
+# started: 2026-11-17T13:46:26.921Z finished: 2026-11-17T13:46:30.288Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # expectations:
 #   expect: pass
 # ----
-$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift run --scratch-path /tmp/multica-task-4124751358/smg-scratch-f14-traits-verbose-238492 --disable-default-traits --traits VerboseLogs F14Runner
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift run --scratch-path /tmp/multica-task-193273389/smg-scratch-f14-traits-verbose-271883 --disable-default-traits --traits VerboseLogs F14Runner
 # step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f14/pkg | exit: 0
 --- stdout ---
 describe=generic debug=verbose
@@ -15,15 +15,15 @@ describe=generic debug=verbose
 Building for debugging...
 [0/7] Write sources
 [2/7] Write swift-version--7C7DF2BDD5441AFA.txt
-[4/9] Compiling Core Core.swift
-[5/9] Emitting module Core
+[4/9] Emitting module Core
+[5/9] Compiling Core Core.swift
 [6/10] Wrapping AST for Core for debugging
 [8/12] Emitting module F14Runner
 [9/12] Compiling F14Runner main.swift
 [10/13] Wrapping AST for F14Runner for debugging
 [11/13] Write Objects.LinkFileList
 [12/13] Linking F14Runner
-Build of product 'F14Runner' complete! (2.87s)
+Build of product 'F14Runner' complete! (2.90s)
 
 --- end ---
 exit: 0

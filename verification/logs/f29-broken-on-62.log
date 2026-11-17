@@ -1,7 +1,7 @@
 # sample: f29-broken-on-62
 # feature: F29 (@c 函数与枚举（C 互操作）)
 # kind: broken | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:23:46.948Z finished: 2026-11-17T13:23:47.043Z
+# started: 2026-11-17T13:46:52.944Z finished: 2026-11-17T13:46:53.043Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f29/after.swift sha256=e9041c6c1ac2c1230476e9503920dbe09cc1312e43c56a0ac5e819d085d6f4a9
 # expectations:

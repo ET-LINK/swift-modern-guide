@@ -30,6 +30,12 @@ for (const hf of htmlFiles) {
   const rel = path.relative(DIST, hf);
   for (const m of [...html.matchAll(/href="([^"]+)"/g)]) {
     const href = m[1];
+    // protocol-relative 链接（//features/）会被浏览器解析为 http://features/，
+    // 一律视为断链——这类缺陷曾让全站导航失效
+    if (href.startsWith('//')) {
+      problems.push(`${rel} → ${href}（protocol-relative 站内链接，浏览器会解析为外部主机）`);
+      continue;
+    }
     if (/^(https?:|data:|mailto:|#)/.test(href)) continue;
     const [clean, hash] = href.split('#');
     if (!clean) continue;

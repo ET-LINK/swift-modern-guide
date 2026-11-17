@@ -1,7 +1,7 @@
 # sample: f08-build-run
 # feature: F08 (C++ 互操作：move-only、virtual methods、default arguments)
 # kind: after | mode: package-build-run | toolchain: swift-6.2
-# started: 2026-11-17T13:23:20.868Z finished: 2026-11-17T13:23:21.460Z
+# started: 2026-11-17T13:46:19.097Z finished: 2026-11-17T13:46:20.018Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # expectations:
 #   expect: pass
@@ -14,9 +14,10 @@ virtual dispatch: area of r=7 circle = 154
 cpp default arg: 12
 
 --- stderr ---
+[0/1] Planning build
 Building for debugging...
 [0/2] Write swift-version--7C7DF2BDD5441AFA.txt
-Build of product 'F08Runner' complete! (0.10s)
+Build of product 'F08Runner' complete! (0.11s)
 
 --- end ---
 exit: 0

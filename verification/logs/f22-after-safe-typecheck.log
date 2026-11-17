@@ -1,7 +1,7 @@
 # sample: f22-after-safe-typecheck
 # feature: F22 (Opt-in strict memory safety（-strict-memory-safety）)
 # kind: after | mode: typecheck | toolchain: swift-6.2
-# started: 2026-11-17T13:23:42.587Z finished: 2026-11-17T13:23:42.683Z
+# started: 2026-11-17T13:46:47.355Z finished: 2026-11-17T13:46:47.459Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f22/after.swift sha256=becf8682c841fabf42d0895795d805e0872537db7d335b4c0982dfe693310157
 # expectations:

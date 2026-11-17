@@ -1,13 +1,13 @@
 # sample: f06-broken-use-after-send
 # feature: F06 (sending 参数与结果)
 # kind: broken | mode: compile6 | toolchain: swift-6.2
-# started: 2026-11-17T13:23:19.814Z finished: 2026-11-17T13:23:19.915Z
+# started: 2026-11-17T13:46:18.051Z finished: 2026-11-17T13:46:18.144Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f06/broken.swift sha256=281a7dd056dce0de0d70e5e9028871be40498dabc98d4339fc615ac4a1e616e4
 # expectations:
 #   expect: fail-with-diagnostic (diagnosticSubstring: "parameter of noncopyable type 'Peg' must specify ownership")
 # ----
-$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f06/broken.swift -o /tmp/multica-task-4124751358/smg-f06-broken-use-after-send-238492
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f06/broken.swift -o /tmp/multica-task-193273389/smg-f06-broken-use-after-send-271883
 # step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
 --- stdout ---
 (空)
