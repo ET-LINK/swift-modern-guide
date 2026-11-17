@@ -1,0 +1,58 @@
+---
+id: F11
+title: nonisolated 用于类型与 extension（阻断全局 actor 推断）
+introduced: '6.1'
+versions: ['6.1']
+themes: ['concurrency']
+category: B
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0449 nonisolated for global actor cutoff
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0449-nonisolated-for-global-actor-cutoff.md
+sampleIds:
+  - f11-after-typecheck
+  - f11-broken-crossing
+summary: nonisolated 从「只能修饰成员」扩展到类型与 extension：整体退出 @MainActor 推断，一致性大提升。
+---
+
+import after from '../../../examples/f11/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+`@MainActor struct` 想加两个纯计算方法？6.0 及以前你得给**每个**成员挨个写 `nonisolated func`——
+漏一个，方法就被类型隔离带着跑，跨隔离调用立刻炸。
+extension 里也同样：给 @MainActor 类型补 extension，成员隔离跟着类型走，想例外只能一行行标。
+
+## 为什么变
+
+SE-0449 把 `nonisolated` 提升到类型/extension 粒度：
+`nonisolated struct` 直接宣布「这个类型不参与全局 actor 推断」；`nonisolated extension Foo` 一次性例外整个扩展。
+这是 approachable concurrency（让新手少学一层才能写对）系列的一步——
+Swift 6.1 的官方示例还把它与 `@MainActor struct` 搭配做「数据 MainActor、逻辑不隔离」的分层。
+
+## 新写法
+
+<SwiftCode code={after} caption="after.swift · 类型级与 extension 级 nonisolated（-swift-version 6 typecheck 验证）" />
+
+## 诊断与「是否仍合法」
+
+- 新写法本身在 6.1+ 工具链才被解析。值得注意的反而是 broken 样本——
+  `nonisolated extension` 成员真在非隔离域运行，所以在里面同步调用 `@MainActor func` 会被拒绝：
+  `call to main actor-isolated global function 'refresh()' in a synchronous nonisolated context`。
+- 「既想挂 @MainActor 又想成员不隔离」不再需要拆 struct + free function 的怪招。
+
+## 常见坑
+
+- extension 上写 `nonisolated` 影响**这个 extension 里的成员**，不改变类型本身的隔离；
+- 隔离协议 conformance 时（比如 async requirement），nonisolated 成员的隔离检查照旧——不要因为「编译过了」就假设它跑在 MainActor。
+
+## 迁移检查
+
+- [ ] 搜出 `@MainActor` 类型里逐行的 `nonisolated func`，能合并的抽到 nonisolated extension；
+- [ ] 与 SendableMetatype / Codable 相关的合成成员（CodingKeys 等）配合 MainActor 时的坑看 SE-0466（F18）。
+
+## 官方证据
+
+- SE-0449：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0449-nonisolated-for-global-actor-cutoff.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0449-nonisolated-for-global-actor-cutoff.md)
+- Swift 6.1 发布说明 · Concurrency：[https://www.swift.org/blog/swift-6.1-released/#concurrency](https://www.swift.org/blog/swift-6.1-released/#concurrency)

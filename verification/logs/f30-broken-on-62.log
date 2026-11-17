@@ -1,0 +1,73 @@
+# sample: f30-broken-on-62
+# feature: F30 (Module selectors（Module::api）)
+# kind: broken | mode: typecheck6 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:47.910Z finished: 2026-11-17T13:23:47.999Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f30/client.swift sha256=574c750f8f844df5211fced006ceea474a44d1b51f4704ed888f67e789bf53bb
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "consecutive statements on a line must be separated by ';'")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 6 -I examples/f30/build /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/client.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/client.swift:10:18: error: consecutive statements on a line must be separated by ';'
+ 8 | 
+ 9 | func picked() -> (Int, Int) {
+10 |   let x = ModuleA::getValue()
+   |                  `- error: consecutive statements on a line must be separated by ';'
+11 |   let y = ModuleB::getValue()
+12 |   return (x, y)
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/client.swift:10:18: error: expected expression
+ 8 | 
+ 9 | func picked() -> (Int, Int) {
+10 |   let x = ModuleA::getValue()
+   |                  `- error: expected expression
+11 |   let y = ModuleB::getValue()
+12 |   return (x, y)
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/client.swift:11:18: error: consecutive statements on a line must be separated by ';'
+ 9 | func picked() -> (Int, Int) {
+10 |   let x = ModuleA::getValue()
+11 |   let y = ModuleB::getValue()
+   |                  `- error: consecutive statements on a line must be separated by ';'
+12 |   return (x, y)
+13 | }
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/client.swift:11:18: error: expected expression
+ 9 | func picked() -> (Int, Int) {
+10 |   let x = ModuleA::getValue()
+11 |   let y = ModuleB::getValue()
+   |                  `- error: expected expression
+12 |   return (x, y)
+13 | }
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/client.swift:16:20: error: consecutive statements on a line must be separated by ';'
+14 | 
+15 | nonisolated func concurrencySelector() {
+16 |   let named = Swift::Task { 1 }
+   |                    `- error: consecutive statements on a line must be separated by ';'
+17 |   _ = named
+18 | }
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/client.swift:16:20: error: expected expression
+14 | 
+15 | nonisolated func concurrencySelector() {
+16 |   let named = Swift::Task { 1 }
+   |                    `- error: expected expression
+17 |   _ = named
+18 | }
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/client.swift:6:8: error: module compiled with Swift 6.3.3 cannot be imported by the Swift 6.2 compiler: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/build/ModuleA.swiftmodule
+ 4 | // 运行器同样会用 6.2 编译此文件，得到解析级错误：
+ 5 | //   error: consecutive statements on a line must be separated by ';'
+ 6 | import ModuleA
+   |        `- error: module compiled with Swift 6.3.3 cannot be imported by the Swift 6.2 compiler: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/build/ModuleA.swiftmodule
+ 7 | import ModuleB
+ 8 | 
+
+--- end ---
+exit: 1
+result: PASS

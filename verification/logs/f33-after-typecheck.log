@@ -1,0 +1,18 @@
+# sample: f33-after-typecheck
+# feature: F33 (Optional some / any 语法糖)
+# kind: after | mode: typecheck | toolchain: swift-6.4.2
+# started: 2026-11-17T13:23:49.553Z finished: 2026-11-17T13:23:49.658Z
+# swift --version: Swift version 6.4.2 (swift-6.4.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f33/after.swift sha256=b3e1b39e797b4f5576252c04a6158d3fe7a0b0f5df6f82f764b372fe0d41cf5f
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.4.2/usr/bin/swiftc -typecheck /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

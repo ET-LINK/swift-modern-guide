@@ -1,0 +1,56 @@
+---
+id: F24
+title: Named tasks（任务命名）
+introduced: '6.2'
+versions: ['6.2']
+themes: ['concurrency']
+category: B
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0469 Task naming
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0469-task-names.md
+sampleIds:
+  - f24-after-typecheck
+summary: Task(name:) / addTask(name:) 给并发工作一个人类可读的名字——调试器与观测工具的定位键。
+---
+
+import after from '../../../examples/f24/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+线上卡顿，抓到一堆 Task——哪个是哪个？Swift 并发任务没有名字，
+pthread 时代有 queue label、GCD 有 `dispatch_queue_label`，async/await 时代反而两眼一抹黑。
+调试器/profiler/spdump 工具拿到的都是匿名 job。
+
+## 为什么变
+
+SE-0469（实现于 Swift 6.2）给任务加上**创建期命名**：`Task(name:)`、`Task.detached(name:)`、
+`group.addTask(name:)`，并允许运行期读取当前任务名（`Task.name`）。
+名字进入 runtime，供调试工具（swift-inspect、Instruments 家族）标注。
+
+## 新写法
+
+<SwiftCode code={after} caption="after.swift · 只采用 6.2 已实现的创建期 API 与当前任务名读取" />
+
+## 诊断与「是否仍合法」——边界如实写
+
+- 不命名照样合法，名字纯增量；本条不设 broken 样本。
+- **边界说明**：SE-0469 的「Task handle 上读 name 实例属性」来自后续修订（amendment），
+  本站实测同一代码在 6.2 报 `static member 'name' cannot be used on instance`、"在 6.4.2 可用"——
+  所以本页明确只承诺 6.2 已实现部分：创建期参数 + `Task.name`（当前任务名）。
+- 还有 `withTaskGroup(of:, name:)` 也不在 6.2（实测 `extra arguments` 拒绝）——别在代码里模仿。
+
+## 常见坑
+
+- 名字可带插值：`Task(name: "reload \(userId)")` 观测时能看到每次请求的归属；
+- 名字**运行期计算**，做日志检索时注意与任务本地值的分工——不是 task-local 替代品。
+
+## 迁移检查
+
+- [ ] 生产路径的裸 `Task {}` 与热任务组补名字（先定位痛点再写）；
+- [ ] 观测三件套统一命名规范：动词 + 实体 + 上下文。
+
+## 官方证据
+
+- SE-0469（含 amendment 记录）：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0469-task-names.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0469-task-names.md)

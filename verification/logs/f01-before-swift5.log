@@ -1,0 +1,18 @@
+# sample: f01-before-swift5
+# feature: F01 (Swift 6 language mode 与 data-race safety)
+# kind: before | mode: typecheck5 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:16.326Z finished: 2026-11-17T13:23:16.409Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f01/before.swift sha256=7e2c1e674cc3a1956b8c3df7d922d62e019bf3aa870562f79df6b67ab13f5e00
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 5 -parse-as-library /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f01/before.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

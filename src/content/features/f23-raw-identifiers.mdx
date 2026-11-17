@@ -1,0 +1,56 @@
+---
+id: F23
+title: Escaped identifiers / raw identifiers
+introduced: '6.2'
+versions: ['6.2']
+themes: ['type-system']
+category: A
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0451 Raw identifiers
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0451-escaped-identifiers.md
+sampleIds:
+  - f23-after-typecheck
+  - f23-broken-unescaped
+summary: 反引号里可以放空格、数字开头等「非标识符」字符；成员访问处反引号不能省。
+---
+
+import after from '../../../examples/f23/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+三种需求没有出路（SE-0275 被退回后搁置多年）：
+测试名想写人话（`func square returns x times x()`）只能靠 `@Test("...")` 的 display name 双份维护；
+设计系统的色号名字天生数字开头（`50` `100` `...`），被迫 `_50` / `variant50`；
+代码生成器给非合规资源名（`1.circle`）做有损映射——碰撞处理逻辑复杂到要写文档。
+
+## 为什么变
+
+SE-0451 落地 **raw identifiers**：反引号内允许非标识符字符（空格、数字开头、标点混合）。
+带有这层语义的名字参与 mangling/反射/调试。原 SE-0275 的教训被吸收：**操作符特例被排除**（`` `+` `` 不是名字）。
+
+## 新写法
+
+<SwiftCode code={after} caption="after.swift · 数字开头的 case、带空格的成员、调用处的强制反引号" />
+
+## 诊断与「是否仍合法」
+
+- 旧的反引号 keyword-escape（``func `for`()``）一直是合法的——raw identifiers 是**扩大范围**而非替换；
+- 新的硬规矩：raw identifier 在成员访问处**必须**继续写反引号（这张网拦住了所有解析歧义）。
+  broken 样本裸写 `s.with a space` 的诊断是解析级的 `expected ',' separator`（含连锁的 cannot find 错误）。
+
+## 常见坑
+
+- `50` 这类元组成员：`tuple.`0`` 永远表示 label、`tuple.0` 永远表示 index——两条路不撞车；
+- Objective-C 边界要求显式合法标识符，raw identifier 必须另给 `@objc(name)`；
+- swift-testing 的 display name 需求因此多了一种**单名解决方案**（测试函数名本身就可以是人话）。
+
+## 迁移检查
+
+- [ ] 代码生成器：碰撞规避映射可以删了；
+- [ ] 设计系统的数字色号等 API 正名时评估采用。
+
+## 官方证据
+
+- SE-0451：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0451-escaped-identifiers.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0451-escaped-identifiers.md)

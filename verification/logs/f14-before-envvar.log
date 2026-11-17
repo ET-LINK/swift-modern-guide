@@ -1,0 +1,20 @@
+# sample: f14-before-envvar
+# feature: F14 (SwiftPM package traits)
+# kind: before | mode: run-swift | toolchain: swift-6.2
+# started: 2026-11-17T13:23:38.454Z finished: 2026-11-17T13:23:38.634Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f14/before.swift sha256=d310da65f8342aa7f6cf67790aeded4571a8f2c25563dd583674703878247b55
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f14/before.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+traits-style=generic
+traits-style=fast
+
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

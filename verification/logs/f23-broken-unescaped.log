@@ -1,0 +1,38 @@
+# sample: f23-broken-unescaped
+# feature: F23 (Escaped identifiers / raw identifiers)
+# kind: broken | mode: typecheck | toolchain: swift-6.2
+# started: 2026-11-17T13:23:43.457Z finished: 2026-11-17T13:23:43.533Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f23/broken.swift sha256=5d31be9925b2043ec9ec935d0c6be12559651fb6b428576e8d82d9a1d7792509
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "expected ',' separator")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f23/broken.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f23/broken.swift:9:14: error: expected ',' separator
+ 7 | }
+ 8 | let s = S()
+ 9 | print(s.with a space)    // ← 必须写 s.`with a space`
+   |              `- error: expected ',' separator
+10 | 
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f23/broken.swift:9:14: error: cannot find 'a' in scope
+ 7 | }
+ 8 | let s = S()
+ 9 | print(s.with a space)    // ← 必须写 s.`with a space`
+   |              `- error: cannot find 'a' in scope
+10 | 
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f23/broken.swift:9:9: error: value of type 'S' has no member 'with'
+ 7 | }
+ 8 | let s = S()
+ 9 | print(s.with a space)    // ← 必须写 s.`with a space`
+   |         `- error: value of type 'S' has no member 'with'
+10 | 
+
+--- end ---
+exit: 1
+result: PASS

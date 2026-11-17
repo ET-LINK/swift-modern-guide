@@ -1,0 +1,64 @@
+---
+id: F21
+title: Span 与标准库 .span 视图
+introduced: '6.2'
+versions: ['6.2']
+themes: ['memory-ownership']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0447 Span
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0447-span-access-shared-contiguous-storage.md
+  - label: SE-0456 Stdlib Span properties
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0456-stdlib-span-properties.md
+sampleIds:
+  - f21-before-unmanaged-pointer
+  - f21-after-run
+  - f21-broken-escape
+summary: 借用视角看待连续存储：.span 给你零拷贝只读窗口，~Escapable 把生命周期锁在作用域里。
+---
+
+import before from '../../../examples/f21/before.swift?raw';
+import after from '../../../examples/f21/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+「把数组当成一段连续内存读」= `withUnsafeBufferPointer` 的天下：
+每读一次都在 unsafe 边界里裸奔；想在作用域外保留视觉图？直接 UB。
+指针世界里**借用（borrow）无第一公民表达**。
+
+## 为什么变
+
+两个 SE 分工：SE-0447 定义 `Span<T>`——对连续存储的**非拥有只读视图**、类型 `~Escapable`
+（不能逃出所在作用域，编译器强制）；SE-0456 给标准库集合（Array、ContiguousArray 等）加 `.span` 快捷视图。
+unsafe 指针的所有安全用途从此有了「不 unsafe 的版型」。
+
+## 旧写法与新写法
+
+<SwiftCode code={before} caption="before · withUnsafeBufferPointer（合法，本机可运行）" />
+
+<SwiftCode code={after} caption="after · values.span 就地消费（本机运行 span sum: 60）" />
+
+## 诊断与「是否仍合法」
+
+- before **仍然合法**——unsafe API 没有被拿掉，只是多了安全选项。
+- 新写法的护栏是教出来的：想把 `Span` 从函数返回去（`func bad() -> Span<Int>`）直接被类型系统拒绝：
+  `a function cannot return a ~Escapable result`（broken 样本，真机日志）。
+- 生命周期锁定的代价是**就地消费**：留下视图请用 `withSpan`/函数参数这类作用域化 API（6.2 后持续丰富，6.4 的 borrow accessor 是下一站）。
+
+## 常见坑
+
+- `mutableSpan` 这类可变视图在该工具链上的赋值通道有额外限制（本站实测 get-only 报错样例）——只读 span 是稳定路径；
+- ⚠️ 部署可用性：Apple 平台对应 26 系列目标；Ubuntu host 只证编译期可用（见「关于」）；
+- 别把 Span 当成「新 Array」：它是窗口，不是容器，easy 掉进「函数返回窗口」的反模式。
+
+## 迁移检查
+
+- [ ] 代码库的 withUnsafeBufferPointer 全部点检：哪些只是**读**？只读的全部换 `.span`；
+- [ ] C 互操作边界需要的 lifetime 文档，Span tl;dr 后重写。
+
+## 官方证据
+
+- SE-0447：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0447-span-access-shared-contiguous-storage.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0447-span-access-shared-contiguous-storage.md)
+- SE-0456：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0456-stdlib-span-properties.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0456-stdlib-span-properties.md)

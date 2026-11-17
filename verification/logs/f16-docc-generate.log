@@ -1,0 +1,37 @@
+# sample: f16-docc-generate
+# feature: F16 (DocC 符号链接按参数/返回类型消歧)
+# kind: after | mode: docc-generate | toolchain: swift-6.2
+# started: 2026-11-17T13:23:39.357Z finished: 2026-11-17T13:23:40.294Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift package generate-documentation --target F16Docs
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f16/pkg | exit: 0
+--- stdout ---
+Extracting symbol information for 'F16Docs'...
+Finished extracting symbol information for 'F16Docs'. (0.24s)
+Building documentation for 'F16Docs'...
+warning: 'combine(_:)' is ambiguous at '/F16Docs'
+ --> index.md:5:24-5:35
+3 | 演示 DocC 符号链接按参数/返回类型消歧。
+4 |
+5 + 旧式同名链接：``combine(_:)`` —— 两个同参数个数的重载之间歧义，生成警告并给出「Insert '->Int' / '->Double'」建议。
+  |                                   ├─suggestion: Insert '->Double' for 'func combine(_ first: Double) -> Double'
+  |                                   ╰─suggestion: Insert '->Int' for 'func combine(_ first: Int) -> Int'
+
+Finished building documentation for 'F16Docs' (0.07s)
+Generated documentation archive at:
+  /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f16/pkg/.build/plugins/Swift-DocC/outputs/F16Docs.doccarchive
+
+--- stderr ---
+Building for debugging...
+[0/2] Write swift-version--7C7DF2BDD5441AFA.txt
+Build of product 'snippet-extract' complete! (0.15s)
+Building for debugging...
+[0/1] Write swift-version--7C7DF2BDD5441AFA.txt
+Build of target: 'F16Docs' complete! (0.20s)
+
+--- end ---
+exit: 0
+result: PASS

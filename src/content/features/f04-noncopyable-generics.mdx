@@ -1,0 +1,55 @@
+---
+id: F04
+title: Noncopyable generics
+introduced: '6.0'
+versions: ['5.9', '6.0']
+themes: ['memory-ownership', 'type-system']
+category: A
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0427 Noncopyable generics
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0427-noncopyable-generics.md
+sampleIds:
+  - f04-after-typecheck
+summary: "泛型形参终于可以要求 T: ~Copyable——5.9 的非复制类型在 6.0 获得进入泛型世界的门票。"
+---
+
+import after from '../../../examples/f04/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+5.9 引入 `~Copyable`（见 F03）之后有个尴尬：泛型全员隐式 `Copyable`。
+你想给非复制资源写一个通用容器 `Box<T>`？编译器直接要求 `T` 可复制——
+**非复制类型在 6.0 之前根本进不了泛型世界**。这不是「报错难看」的问题，而是能力缺失：
+Swift 的抽象工具（协议、泛型）对 ~Copyable 全部关门。
+
+## 为什么变
+
+SE-0427 放开两层：泛型形参可以写 `T: ~Copyable`（反向选择退出复制约束），
+协议也能用 `~Copyable` 参与。从此「所有权」与「抽象」可以组合表达——Swift 开始有了系统语言该有的模型。
+
+## 新写法
+
+<SwiftCode code={after} caption="after.swift · Box<T: ~Copyable>、borrowing 泛型函数、inout 交换非复制值（typecheck 验证）" />
+
+## 诊断与「是否仍合法」
+
+本特性是「能力扩展」：以前写不出的代码现在能写，所以没有「旧代码昨天能编、今天报错」的对照——
+**旧写法（把 ~Copyable 拒之门外的泛型）在 6.0+ 依旧合法，只是不够表达**。
+如果强行给非复制类型构造 `Box<Resource>`（不给 `~Copyable` 约束的旧式 Box），诊断会指向「Resource 不满足 Copyable 要求」。
+
+## 常见坑
+
+- `~Copyable` 的 generic 参数在函数体内不能随意复制——`borrowing`/`consuming`/`inout` 要写对（这正是安全性的来源）。
+- 与 existential 组合仍是实验区：`any P`（P 含 ~Copyable requirement）逐步在后续版本完善，别把生态指望寄托在这上面。
+
+## 迁移检查
+
+- [ ] 已有 ~Copyable 类型的复制变通（类型擦除 wrapper、特化重载）检查能否删掉；
+- [ ] 公共 API 若要暴露非复制泛型，标注齐全再发版。
+
+## 官方证据
+
+- SE-0427：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0427-noncopyable-generics.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0427-noncopyable-generics.md)
+- 与 F03（~Copyable 本体）搭配食用。

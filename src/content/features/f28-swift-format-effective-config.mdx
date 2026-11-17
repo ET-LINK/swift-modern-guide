@@ -1,0 +1,68 @@
+---
+id: F28
+title: swift-format 有效配置查看（--effective）
+introduced: '6.2'
+versions: ['6.2']
+themes: ['testing-tooling']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: swift-format 602.0.0 release notes
+    url: https://github.com/swiftlang/swift-format/releases/tag/602.0.0
+  - label: swift-format 6.2 README · Viewing the effective configuration
+    url: https://github.com/swiftlang/swift-format/blob/release/6.2/README.md#viewing-the-effective-configuration
+sampleIds:
+  - f28-dump-effective
+summary: dump-configuration --effective 把「工具链默认 + 项目 .swift-format 合并后」的生效配置完整吐出来。
+---
+
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+格式化结果「为什么是这样」永远是黑盒：本项目 `.swift-format` 覆盖了哪些键？
+没覆盖的键当前工具链的默认是什么？600.0.0 之前，`dump-configuration` **只显示默认值**，
+项目配置的合并视图没有官方查询方式——刀耕火种靠 diff 脑补，formatter 升级一次全员重新猜。
+
+## 为什么变
+
+swift-format 602.0.0（对应工具链 6.2）的 `dump-configuration` 增加 `--effective` 选项：
+输出**生效配置**（命令行、项目文件与默认值合并后的结果）。
+JSON 完整可复现——「为什么缩进是 two-space」从此一句话能回答。
+
+## 用法（真实命令）
+
+```text
+$ swift-format dump-configuration --effective
+{
+  "fileScopedDeclarationPrivacy" : { "accessLevel" : "private" },
+  "indentConditionalCompilationBlocks" : true,
+  "indentSwitchCaseLabels" : false,
+  "indentation" : { "spaces" : 2 },
+  ...
+}
+```
+
+验证区给出**机器运行的真实完整 JSON**（含 `"version"`、`fileScopedDeclarationPrivacy` 等断言点），
+不是手抄示例。
+
+## 诊断与「是否仍合法」
+
+本条不设负例：它是**可观测性能力**，没有「旧写法报错」的形态。
+旧的位置参数用法照旧。诚实标注的对照点：老版本只有裸 dump（默认值视图）——
+升级工具链即可获得合并视图，没有迁移成本。
+
+## 常见坑
+
+- `--effective` 的输出随工具链版本演进（新键会加入），diff 目标要 pin 版本（本站锁 6.2.0）；
+- 它能解释「为什么」，但不能替代 codestyle 决策——团队仍要在 .swift-format 里**显式**写下关键键，防止跨版本漂移。
+
+## 迁移检查
+
+- [ ] 团队格式疑问从「翻源码猜」切到 `--effective` 查询；
+- [ ] codestyle 文档里贴一份 pinned 版本的 effective 快照。
+
+## 官方证据
+
+- swift-format 602.0.0 release notes：[https://github.com/swiftlang/swift-format/releases/tag/602.0.0](https://github.com/swiftlang/swift-format/releases/tag/602.0.0)
+- 6.2 分支 README · Viewing the effective configuration：[https://github.com/swiftlang/swift-format/blob/release/6.2/README.md#viewing-the-effective-configuration](https://github.com/swiftlang/swift-format/blob/release/6.2/README.md#viewing-the-effective-configuration)

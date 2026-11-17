@@ -1,0 +1,24 @@
+# sample: f20-broken-count-mismatch
+# feature: F20 (InlineArray 与 [N of T] 语法糖)
+# kind: broken | mode: typecheck | toolchain: swift-6.2
+# started: 2026-11-17T13:23:41.665Z finished: 2026-11-17T13:23:41.738Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f20/broken.swift sha256=179b40f0f36d5850bc2ed665c40b513153be162f59e3aae118949efe6769a3c7
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "but got '4'")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f20/broken.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f20/broken.swift:4:21: error: expected '3' elements in inline array literal, but got '4'
+2 | // 诊断（Swift 6.2）：
+3 | //   error: expected '3' elements in inline array literal, but got '4'
+4 | let a: [3 of Int] = [1, 2, 3, 4]
+  |                     `- error: expected '3' elements in inline array literal, but got '4'
+5 | 
+
+--- end ---
+exit: 1
+result: PASS

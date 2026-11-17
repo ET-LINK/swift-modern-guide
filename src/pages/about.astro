@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+---
+<Base title="关于本站 · 来源政策与已知不足" description="内容口径、来源政策、隐私说明与诚实的已知不足清单。">
+  <h1>关于本站</h1>
+
+  <h2>读者与口径</h2>
+  <p>
+    面向「会写 Swift、但没系统跟进 6.x」的 iOS 开发者。每条特性回答「这段代码昨天还能编，今天为什么不能？」
+    或者「今天终于能编了，边界在哪里？」。中文行文，术语保留英文。
+  </p>
+
+  <h2>来源政策</h2>
+  <ul>
+    <li>每条特性必须挂 Swift Evolution 提案（SE-xxxx / ST-xxxx）或官方发布说明链接，并标注首次可用版本。</li>
+    <li>官方来源只使用 swift.org、docs.swift.org、developer.apple.com、github.com/swiftlang。</li>
+    <li>文章正文不翻译官方博客段落；示例代码全部为本仓库源码、由本机工具链真实编译/运行。</li>
+    <li>时间线事实（截至 2026-11-17）：Swift 6.3 于 2026-03-24 发布、6.4 于 2026-09-15 发布，官方最新补丁版 6.4.2（2026-10-29）。</li>
+    <li>勘误两则常见误传：<code>~Copyable</code>（SE-0390）首发于 Swift <strong>5.9</strong>，Swift 6.0 新增的是 noncopyable generics（SE-0427）；「新 App 默认 MainActor」是 Xcode 26 项目模板的构建设置，不是编译器对所有模块的默认（见 F18）。</li>
+  </ul>
+
+  <h2>验证口径</h2>
+  <ul>
+    <li>三套工具链：Swift 6.2（6.0–6.2 特性）、6.3.3（6.3 特性）、6.4.2（6.4 特性），全部在 Ubuntu 24.04 x86_64 host 上解压安装。</li>
+    <li>验证以 manifest 驱动：每个样本记录 argv、工作目录、stdout/stderr、退出码、输入文件 SHA256 与起止时间（<a href={`${base}verification/`}>总表</a>）。</li>
+    <li>C 类样本的页面输出一律取自真实执行日志，不做手写「预期输出」。</li>
+    <li>负例要求非零退出码 + 指定诊断子串；对「旧写法仍合法」的场景，文中如实标注「仍合法」而不编造反差。</li>
+  </ul>
+
+  <h2>隐私说明</h2>
+  <ul>
+    <li>零第三方脚本、零 analytics、零运行时 CDN 与远程字体；代码高亮与搜索全部在构建期/本机完成。</li>
+    <li>搜索索引按需从本站拉取；搜索词不上传、不落盘。主题偏好（深/浅色）只存本机 localStorage。</li>
+  </ul>
+
+  <h2>已知不足（诚实清单）</h2>
+  <ul>
+    <li>搜索为构建期索引的中文/英文 substring 匹配，不支持拼音、同义词或全文检索。</li>
+    <li>验证环境是 Ubuntu 24.04 x86_64 host：Xcode / Objective-C 互操作、iOS ABI、真实 MCU 固件烧录均未验证，站点对这些平台只描述官方口径。</li>
+    <li>F16 的 DocC 生成依赖官方 swift-docc-plugin（构建期从 GitHub 拉取一次）；离线复跑该样本需要预先缓存插件。</li>
+    <li>标准库新 API（InlineArray、Span、Mutex 等）在 Apple 平台的部署可用性（26 系列）不由本站验证，请以目标 OS 文档为准。</li>
+    <li>SwiftPM、Swift Testing、DocC 的日志中包含耗时与并行序号，所以对这些日志使用结构化断言（退出码 + 子串），不做 golden 逐行对比；应用自身输出仍为精确 golden。</li>
+    <li>验证日志中包含验证机的绝对路径（.toolchains 布局见 README），工具链二进制本身不进入 git 历史。</li>
+  </ul>
+
+  <h2>许可</h2>
+  <p>
+    代码与内容以 MIT 许可发布（License 文件在仓库根目录），Copyright (c) 2026 ET-LINK。
+    Swift 与 Swift logo 是 Apple Inc. 的商标；本站为社区学习资料，与 Apple、swift.org 无隶属关系。
+  </p>
+</Base>

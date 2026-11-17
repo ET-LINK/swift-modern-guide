@@ -1,0 +1,64 @@
+---
+id: F29
+title: "'@c 函数与枚举（C 互操作）'"
+introduced: '6.3'
+versions: ['6.3']
+themes: ['interop']
+category: A
+toolchain: 'swift-6.3.3'
+officialSources:
+  - label: SE-0495 C compatible functions and enums
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0495-cdecl.md
+  - label: Swift 6.3 发布说明 · C interoperability
+    url: https://www.swift.org/blog/swift-6.3-released/#c-interoperability
+sampleIds:
+  - f29-typecheck-63
+  - f29-emit-header
+  - f29-broken-on-62
+summary: 用 Swift 实现 C 函数：@c 标记 + 类型系统强制「签名 C 可表达」+ 自动生成 C 头声明。
+
+---
+import after from '../../../examples/f29/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+混合源码库里「某个 C 函数想用 Swift 实现」？官方答案长期只有私货 `@_cdecl`
+（社区用了很多年，但没有语言级检查）。签名里不小心放了个 Optional/泛型类型，
+C 侧的调用约定对不对全靠运气。生成的 C 头？没有——隐藏在链接器与写手的默契里。
+
+## 为什么变
+
+SE-0495（Swift 6.3 落地）把这件事**正式化**：
+
+1. `@c` 标全局函数：签名通过「C 可表达」类型检查（Int/指针/C 整型/`@convention(c)` 函数引用等），默认给 C 符号名，`@c(custom_name)` 可改；
+2. `@c` 标枚举：raw 类型必须是 C 兼容整数，case 映射 `LevelLow / LevelHigh` 风格；
+3. 与 `@c @implementation` 搭配可以「实现 C 头里已声明的函数」并让编译器**核对签名**；
+4. `-emit-clang-header-path` 生成的头里新增 C 块（本站实证：`SWIFT_EXTERN int addValues(int a, int b) ...`）。
+
+## 新写法
+
+<SwiftCode code={after} caption="after.swift · @c 函数（默认名 + 自定义名）与 @c 枚举" />
+
+## 诊断与「是否仍合法」
+
+- 6.2 工具链直接拒绝这个语法：`error: unknown attribute 'c'`（broken 样本同文件实测）——
+  **这是「6.3 首版」最硬的证据**，不是文档上的一行话；
+- `@_cdecl` 的旧行为由 `@objc`/`@c` 继承并收编（SE 原文：`@objc` 全局函数可替代 `@_cdecl`）；
+- 签名里放了 C 表达不了的类型（非指针 Optional、协议存在量等）会被 type-check 拒绝——这是它比 `@_cdecl` 强的地方。
+
+## 常见坑
+
+- `@c` 枚举的 raw 值表达式也须 C 可表达；
+- 加/去 `@c`、改签名跨界桥接都是**源兼容甚至 ABI 敏感**变更（提案的 ABI 表格）；
+- 生成的头是**兼容头**的一部分（与 ObjC/C++ 块共存），不要 diff 全文件比对来检测变更。
+
+## 迁移检查
+
+- [ ] 库里的 `@_cdecl` 全部改写为 `@c`（或保留语义等价的 `@objc`）；
+- [ ] 跨语言边界 API 入榜首查一遍 `@c` 签名检查。
+
+## 官方证据
+
+- SE-0495：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0495-cdecl.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0495-cdecl.md)
+- Swift 6.3 发布说明 · C interoperability：[https://www.swift.org/blog/swift-6.3-released/#c-interoperability](https://www.swift.org/blog/swift-6.3-released/#c-interoperability)

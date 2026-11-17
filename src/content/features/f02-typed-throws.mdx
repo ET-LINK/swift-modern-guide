@@ -1,0 +1,65 @@
+---
+id: F02
+title: Typed throws
+introduced: '6.0'
+versions: ['6.0']
+themes: ['type-system']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0413 Typed throws
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0413-typed-throws.md
+sampleIds:
+  - f02-before-run
+  - f02-after-run
+  - f02-broken-typecheck
+summary: 错误类型写进函数签名；catch 拿到精确类型，switch 不再需要 default，泛型还能精确转发错误类型。
+---
+
+import before from '../../../examples/f02/before.swift?raw';
+import after from '../../../examples/f02/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+`func fetch() throws -> String` 抛的永远是 `any Error`。调用方 `do-catch` 之后拿到的是擦除类型，
+想按错误种类分派只能 `switch error` + `default`，或者手工 `as?` 拆箱。
+**新增一个错误 case，编译器不会提醒任何调用方**——穷举保证在类型层面失传了。
+
+## 为什么变
+
+SE-0413 让 throw 的错误类型成为签名的一部分：`throws(NetworkError)`。
+收益三件：调用方拿到精确类型的 `error`（不需要拆箱）；catch 块的 switch 可以真正穷举；
+泛型函数可以用 `throws(E)` 把「具体是什么错误」作为类型参数转发，而不是摊平成 `any Error`。
+
+## 旧写法（仍合法，但类型信息被抹掉）
+
+<SwiftCode code={before} caption="before.swift · any Error + 手工拆箱（本机运行输出见验证区）" />
+
+新写法：
+
+<SwiftCode code={after} caption="after.swift · throws(NetworkError) + 穷举 switch + 泛型转发" />
+
+## 诊断与「是否仍合法」
+
+- 旧写法当然仍合法。真正的分水岭是**类型不匹配**开始报错：
+  把 `throws(ParseError)` 的函数塞给要求 `() throws(AuthError) -> Void` 的参数，
+  诊断是 `invalid conversion of thrown error type 'any Error' to 'AuthError'`（见 broken 样本）。
+- 一个反直觉的坑：`catch NetworkError.offline` 这种**带 pattern 的 catch 子句不构成穷举证明**；
+  想拿到穷举保证，用不带 pattern 的 `catch` 绑定精确类型的 `error` 再 `switch`（after.swift 的写法）。
+
+## 常见坑
+
+- 别到处改签名：从 `throws` 收窄成 `throws(E)` 对调用方是宽松变化，反过来会 break 别人。
+- `throws(Never)` 表示「我不抛」——它和 `nothrows` 的函数在经济上等价，但可以作为泛型转发链的一环。
+- typed throws 的意义在**库边界**：把「到底会失败成什么样」写进 API。App 业务代码里 `any Error` 依然合理。
+
+## 迁移检查
+
+- [ ] 库的公共 API：枚举错误类型 + `throws(TheError)`；
+- [ ] `rethrows` 的 API 考虑改成 `rethrows<Error>` 泛型转发形态（见 after.swift 的 forward）；
+- [ ] catch 里删除不必要的 `default`，让编译器替你盯着新增 case。
+
+## 官方证据
+
+- SE-0413：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0413-typed-throws.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0413-typed-throws.md)

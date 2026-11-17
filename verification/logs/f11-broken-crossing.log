@@ -1,0 +1,34 @@
+# sample: f11-broken-crossing
+# feature: F11 (nonisolated 用于类型与 extension（阻断全局主体推断）)
+# kind: broken | mode: typecheck6 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:23.561Z finished: 2026-11-17T13:23:23.639Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f11/broken.swift sha256=77f3b7ac549c1f18e907b0776d72695db0800c0cedff15bdd02353973d4cc835
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "in a synchronous nonisolated context")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f11/broken.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f11/broken.swift:12:5: error: call to main actor-isolated global function 'refresh()' in a synchronous nonisolated context [#ActorIsolatedCall]
+ 4 | //   error: call to main actor-isolated global function 'refresh()' in a
+ 5 | //   synchronous nonisolated context [#ActorIsolatedCall]
+ 6 | @MainActor func refresh() {}
+   |                 `- note: calls to global function 'refresh()' from outside of its actor context are implicitly asynchronous
+ 7 | 
+ 8 | @MainActor struct Model { var id = 1 }
+   :
+10 | nonisolated extension Model {
+11 |   func describe() -> String {
+12 |     refresh()          // ← 这里在非隔离上下文，不能同步进 MainActor
+   |     `- error: call to main actor-isolated global function 'refresh()' in a synchronous nonisolated context [#ActorIsolatedCall]
+13 |     return "model \(id)"
+14 |   }
+
+[#ActorIsolatedCall]: <https://docs.swift.org/compiler/documentation/diagnostics/actor-isolated-call>
+
+--- end ---
+exit: 1
+result: PASS

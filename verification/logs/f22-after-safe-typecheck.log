@@ -1,0 +1,46 @@
+# sample: f22-after-safe-typecheck
+# feature: F22 (Opt-in strict memory safety（-strict-memory-safety）)
+# kind: after | mode: typecheck | toolchain: swift-6.2
+# started: 2026-11-17T13:23:42.587Z finished: 2026-11-17T13:23:42.683Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f22/after.swift sha256=becf8682c841fabf42d0895795d805e0872537db7d335b4c0982dfe693310157
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -strict-memory-safety /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f22/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f22/after.swift:6:1: warning: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+ 4 | var values = [10, 20, 30]
+ 5 | var sum = 0
+ 6 | values.withUnsafeMutableBufferPointer { buf in   // 生命周期被 closure 圈住
+   | |                                     `- note: argument #0 in call to instance method 'withUnsafeMutableBufferPointer' has unsafe type '(inout UnsafeMutableBufferPointer<Int>) -> ()'
+   | `- warning: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+ 7 |   buf[0] += 5
+ 8 |   for i in buf.indices {
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f22/after.swift:7:3: warning: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+ 5 | var sum = 0
+ 6 | values.withUnsafeMutableBufferPointer { buf in   // 生命周期被 closure 圈住
+ 7 |   buf[0] += 5
+   |   |- warning: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+   |   `- note: reference to parameter 'buf' involves unsafe type 'UnsafeMutableBufferPointer<Int>'
+ 8 |   for i in buf.indices {
+ 9 |     sum += buf[i]
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f22/after.swift:9:5: warning: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+ 7 |   buf[0] += 5
+ 8 |   for i in buf.indices {
+ 9 |     sum += buf[i]
+   |     |      `- note: reference to parameter 'buf' involves unsafe type 'UnsafeMutableBufferPointer<Int>'
+   |     `- warning: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+10 |   }
+11 | }
+
+[#StrictMemorySafety]: <https://docs.swift.org/compiler/documentation/diagnostics/strict-memory-safety>
+
+--- end ---
+exit: 0
+result: PASS

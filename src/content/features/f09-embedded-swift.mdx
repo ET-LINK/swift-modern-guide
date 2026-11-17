@@ -1,0 +1,58 @@
+---
+id: F09
+title: Embedded Swift（实验性）
+introduced: '6.0'
+versions: ['6.0', '6.3', '6.4']
+themes: ['interop']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: Swift 6 发布说明 · Embedded Swift
+    url: https://www.swift.org/blog/announcing-swift-6/#embedded-swift
+  - label: Embedded Swift vision
+    url: https://github.com/swiftlang/swift-evolution/blob/main/visions/embedded-swift.md
+sampleIds:
+  - f09-after-run
+summary: 无 Swift 运行时的小型目标编译形态；6.0 为 preview/experimental，host 构建即可验证基本可用性。
+---
+
+import after from '../../../examples/f09/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+这种场景以前不属于 Swift：微控制器、无 OS 固件、启动即全速的小型目标。
+4.x~5.x 的 Swift 需要**运行时**（元数据、反射、ARC 支撑），世界上几十亿颗 MCU 与它无关。
+
+## 为什么变
+
+Embedded Swift 定义了一个子集语言 + 无 runtime 编译形态：泛型静态特化、不依赖元数据与反射。
+6.0 起以 preview / experimental 形态随工具链提供（官方 vision 未承诺稳定 API）。
+6.3 大幅改进 C 互操作与调试支持，6.4 增加 existential 类型与更完善的错误处理支持。
+
+## 新写法（host 构建）
+
+<SwiftCode code={after} caption="after.swift · 编译命令：swiftc -enable-experimental-feature Embedded -wmo（本机真实运行）" />
+
+## 诊断与「是否仍合法」
+
+- 正确姿势是完整编译：样例用 `-enable-experimental-feature Embedded -wmo` 构建后再运行，
+  日志保留构建与运行两步。
+- 诚实边界：本站只验证 **Ubuntu host 构建**。不声称验证任何 MCU/SDK/固件烧录/硬件（见关于页的已知不足）。
+
+## 常见坑
+
+- 子集限制是硬的：无完整泛型（会静态特化而非动态）、无运行时元数据、依赖 libc 的能力看目标；
+  语法酷但生态未成，别急着迁生产代码。
+- `import Glibc` 这类平台模块在 Embedded 模式的编译目标上不可用——样例里只用纯 Swift 子集 + 字符串插值。
+- experimental：`-enable-experimental-feature` 的_list_ 与默认值每个版本都可能变，升级要回归。
+
+## 迁移检查
+
+- [ ] 评估即可，暂无「迁移」一说；参照 6.3/6.4 的增强决定试点时机；
+- [ ] 目标平台 SDK 由官方 firmware SDK / swift-arm 社区发展补齐。
+
+## 官方证据
+
+- Swift 6 发布说明 · Embedded Swift：[https://www.swift.org/blog/announcing-swift-6/#embedded-swift](https://www.swift.org/blog/announcing-swift-6/#embedded-swift)
+- Embedded Swift vision：[https://github.com/swiftlang/swift-evolution/blob/main/visions/embedded-swift.md](https://github.com/swiftlang/swift-evolution/blob/main/visions/embedded-swift.md)

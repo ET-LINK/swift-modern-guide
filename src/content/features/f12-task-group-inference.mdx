@@ -1,0 +1,56 @@
+---
+id: F12
+title: Task group 子任务结果类型推断
+introduced: '6.1'
+versions: ['6.1']
+themes: ['concurrency']
+category: B
+toolchain: swift-6.2
+officialSources:
+  - label: Swift 6.1 发布说明 · Concurrency
+    url: https://www.swift.org/blog/swift-6.1-released/#concurrency
+sampleIds:
+  - f12-before-explicit
+  - f12-after-inferred
+summary: "withTaskGroup 不再必须写 of: Message.self —— 子任务闭包让它自己推。"
+---
+
+import before from '../../../examples/f12/before.swift?raw';
+import after from '../../../examples/f12/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+`withTaskGroup(of: Message.self) { group in ... }` —— `of:` 这个参数没有任何信息量：
+它完全能从 `group.addTask` 的闭包推出来。你以为编译器偷懒？它只是以前没推。
+每个任务组都多写一遍，写错类型还得靠 generic constraint 报错绕回来。
+
+## 为什么变
+
+Swift 6.1 的编译器补上了这个推断（官方 release notes 的 Concurrency 小节）：
+`withTaskGroup { group in ... }` 省掉 `of:`，child result type 从闭包体推导。
+纯减肥特性，无语义变化。
+
+## 旧写法与新写法
+
+<SwiftCode code={before} caption="before · 显式 of:（仍合法、工具链照样编）" />
+
+<SwiftCode code={after} caption="after · 类型推断接管（本站验证同在 -swift-version 6 下）" />
+
+## 诊断与「是否仍合法」
+
+- 旧写法完全合法，没有负例的必要——这正是「宁少而准」的反例集合：本条不设 broken 样本。
+- 注意闭包体内多处 `addTask` 返回类型必须能**汇合**；真冲突时的报错与 6.0 时代一致（generic parameter 推断失败）。
+
+## 常见坑
+
+- 推断适用于 `withTaskGroup` / `withThrowingTaskGroup`（含 discarding 形态）；`async let` 与结构化任务的对应形态本就不需要写类型。
+- 泛型宿主函数里传不进推断链路时（例如把 group 类型作为参数传递），还是得显式——推断只在字面量闭包语境下工作。
+
+## 迁移检查
+
+- [ ] codemod：`withTaskGroup(of: X.self)` 的样板交给格式化/迁移脚本批量删除（风险为零）。
+
+## 官方证据
+
+- Swift 6.1 发布说明 · Concurrency：[https://www.swift.org/blog/swift-6.1-released/#concurrency](https://www.swift.org/blog/swift-6.1-released/#concurrency)

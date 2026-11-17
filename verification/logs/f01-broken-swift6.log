@@ -1,0 +1,30 @@
+# sample: f01-broken-swift6
+# feature: F01 (Swift 6 language mode 与 data-race safety)
+# kind: broken | mode: typecheck6 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:16.755Z finished: 2026-11-17T13:23:16.846Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f01/before.swift sha256=7e2c1e674cc3a1956b8c3df7d922d62e019bf3aa870562f79df6b67ab13f5e00
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "nonisolated global shared mutable state")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 6 -parse-as-library /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f01/before.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f01/before.swift:4:5: error: var 'status' is not concurrency-safe because it is nonisolated global shared mutable state [#MutableGlobalVariable]
+2 | // 同一文件切换到 Swift 6 language mode（-parse-as-library）后会得到
+3 | // “var 'status' is not concurrency-safe because it is nonisolated global shared mutable state”。
+4 | var status = 0
+  |     |- error: var 'status' is not concurrency-safe because it is nonisolated global shared mutable state [#MutableGlobalVariable]
+  |     |- note: convert 'status' to a 'let' constant to make 'Sendable' shared state immutable
+  |     |- note: add '@MainActor' to make var 'status' part of global actor 'MainActor'
+  |     `- note: disable concurrency-safety checks if accesses are protected by an external synchronization mechanism
+5 | 
+6 | struct Syncer {
+
+[#MutableGlobalVariable]: <https://docs.swift.org/compiler/documentation/diagnostics/mutable-global-variable>
+
+--- end ---
+exit: 1
+result: PASS

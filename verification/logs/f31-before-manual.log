@@ -1,0 +1,22 @@
+# sample: f31-before-manual
+# feature: F31 (defer 块中的 async 调用)
+# kind: before | mode: run-swift | toolchain: swift-6.4.2
+# started: 2026-11-17T13:23:48.127Z finished: 2026-11-17T13:23:48.268Z
+# swift --version: Swift version 6.4.2 (swift-6.4.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f31/before.swift sha256=ff41bd63f11d2505f4f1b9dbb9bb03b4400974392b7cafc044ee7bee2ce45cd6
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.4.2/usr/bin/swift /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f31/before.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+open session 9
+body done
+flush logs for 9
+work-9
+
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

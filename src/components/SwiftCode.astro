@@ -1,0 +1,25 @@
+---
+import { codeToHtml } from 'shiki';
+
+interface Props {
+  code: string;
+  lang?: string;
+  caption?: string;
+  filename?: string;
+}
+const { code, lang = 'swift', caption, filename } = Astro.props;
+
+const html = await codeToHtml(code.replace(/\s+$/, ''), {
+  lang,
+  themes: { light: 'github-light', dark: 'github-dark' },
+});
+---
+<div class="code-block">
+  <div class="code-caption">
+    <span>{caption ?? filename ?? lang}</span>
+    <button class="copy-btn" type="button" aria-label="复制代码">
+      <svg aria-hidden="true"><use href="#i-copy"></use></svg>复制
+    </button>
+  </div>
+  <Fragment set:html={html} />
+</div>

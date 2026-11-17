@@ -1,0 +1,28 @@
+# sample: f15-scoping-run
+# feature: F15 (Swift Testing TestScoping（自定义 setup/teardown trait）)
+# kind: after | mode: package-test | toolchain: swift-6.2
+# started: 2026-11-17T13:23:38.761Z finished: 2026-11-17T13:23:39.230Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift test --disable-xctest
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f15/pkg | exit: 0
+--- stdout ---
+◇ Test run started.
+↳ Testing Library Version: 6.2 (3fdabe5392108d8)
+↳ Target Platform: x86_64-unknown-linux-gnu
+◇ Test greetingScoping() started.
+before: setup-counter for greetingScoping()
+after: released
+✔ Test greetingScoping() passed after 0.001 seconds.
+✔ Test run with 1 test in 0 suites passed after 0.001 seconds.
+
+--- stderr ---
+Building for debugging...
+[0/2] Write swift-version--7C7DF2BDD5441AFA.txt
+Build complete! (0.10s)
+
+--- end ---
+exit: 0
+result: PASS

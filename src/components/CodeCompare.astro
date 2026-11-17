@@ -1,0 +1,15 @@
+---
+import SwiftCode from './SwiftCode.astro';
+
+interface Props {
+  before?: string;
+  beforeCaption?: string;
+  after: string;
+  afterCaption?: string;
+  beforeLang?: string;
+  afterLang?: string;
+}
+const { before, beforeCaption = '旧写法', after, afterCaption = '新写法', beforeLang = 'swift', afterLang = 'swift' } = Astro.props;
+---
+{before !== undefined && <SwiftCode code={before} lang={beforeLang} caption={beforeCaption} />}
+<SwiftCode code={after} lang={afterLang} caption={afterCaption} />

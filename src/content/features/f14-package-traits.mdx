@@ -1,0 +1,78 @@
+---
+id: F14
+title: SwiftPM package traits
+introduced: '6.1'
+versions: ['6.1']
+themes: ['testing-tooling']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0450 Package traits
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0450-swiftpm-package-traits.md
+sampleIds:
+  - f14-traits-default
+  - f14-traits-verbose
+  - f14-traits-nodefault
+  - f14-traits-all
+  - f14-before-envvar
+summary: manifest 里声明可选能力集，构建端 --traits 自选；终结「在 Package.swift 里读环境变量」的野路子。
+---
+
+import before from '../../../examples/f14/before.swift?raw';
+import core from '../../../examples/f14/pkg/Sources/Core/Core.swift?raw';
+import manifestSrc from '../../../examples/f14/pkg/Package.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+包想同时伺候 iOS App 与 WebAssembly/嵌入式，可选能力怎么表达？
+主流土办法：**在 Package.swift 里读环境变量**（无官方支持，沙箱收紧随时断），
+再不然就是拆成 N 个仓库（OpenAPI Generator 的 transport 生态就这么碎片化）。
+
+## 为什么变
+
+SE-0450 定义 **traits**：包声明可用 traits 与默认开启集，构建方用
+`--traits A,B` / `--disable-default-traits` / `--enable-all-traits` 定制，
+源代码里 `#if TraitName` 分支。可选依赖、条件编译、跨生态构建全部收进同一套声明。
+
+## 旧写法与新写法
+
+<SwiftCode code={before} caption="before · 运行时环境变量开关（本机运行，两行输出如日志）" />
+
+<SwiftCode code={manifestSrc} lang="swift" caption="Package.swift · traits 声明（含 default 集）" />
+
+<SwiftCode code={core} caption="Core.swift · #if FastPaths / #if VerboseLogs 条件分支" />
+
+## 验证矩阵（真实构建 × 真实运行）
+
+四组构建同一包，输出逐字来自机器运行（见下方验证区）：
+
+| 构建参数 | describe() | debugInfo() |
+|---|---|---|
+| （默认） | fast | quiet |
+| `--disable-default-traits` | generic | quiet |
+| `--traits VerboseLogs` | generic | verbose |
+| `--enable-all-traits` | fast | verbose |
+
+## 诊断与「是否仍合法」
+
+- 环境变量老办法仍然能编（before 样本照常运行），只是不再被官方认可：manifest 沙箱化后随时 may break。
+- 每个 trait 组合都必须可构建——官方建议 traits **应当是加法的（additive）**；
+  互相排斥的组合要靠 `#error` 显式拒绝。
+- 注意 swift run 的 trait 参数要写在可执行名**之前**（`swift run --traits X App`）——
+  写在后面会被当作程序参数默默吞掉，本站验证器为此给每组合独立 scratch 目录。
+
+## 常见坑
+
+- trait 名必须是合法标识符风格，且不能叫 `default` / `defaults`；
+- 默认集是**语义版本的一部分**：从默认集移除 trait 是 breaking change；
+- 客户端按 `.default` + 追加 trait 声明依赖，不是平台判断的替代品。
+
+## 迁移检查
+
+- [ ] 盘点 Package.swift 里的 `ProcessInfo.processInfo.environment`：逐个改造为 trait；
+- [ ] 被拆库伺候多生态的包考虑合并回来、用 traits 分支。
+
+## 官方证据
+
+- SE-0450：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0450-swiftpm-package-traits.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0450-swiftpm-package-traits.md)

@@ -1,0 +1,66 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Verify from '../../components/Verify.astro';
+
+export async function getStaticPaths() {
+  const features = await getCollection('features');
+  return features.map((f) => ({ params: { slug: f.id }, props: { feature: f } }));
+}
+const { feature } = Astro.props;
+const { Content, headings } = await render(feature);
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+
+const all = (await getCollection('features')).sort((a, b) => a.data.id.localeCompare(b.data.id));
+const idx = all.findIndex((f) => f.id === feature.id);
+const prev = idx > 0 ? all[idx - 1] : null;
+const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null;
+
+const seBadges = feature.data.officialSources.map((s) => /\b([Ss][Et]-\d{3,4})\b/.exec(s.label)?.[1]).filter(Boolean);
+const categoryExplain: Record<string, string> = {
+  A: 'A 类验证：swiftc -typecheck 通过即可证伪',
+  B: 'B 类验证：Swift 6 language mode（-swift-version 6）下的类型检查',
+  C: 'C 类验证：实际运行并记录真实输出',
+};
+---
+<Base title={`${feature.data.id} ${feature.data.title} · Swift 6.x 现代特性`} description={feature.data.summary}>
+  <p>
+    <span class="fc-id" style="font-family:ui-monospace,monospace">{feature.data.id}</span>
+    <span class="badge ver" style="margin-left:8px">首版 {feature.data.introduced}</span>
+    {feature.data.expandedIn && <span class="badge" style="margin-left:4px">扩展于 {feature.data.expandedIn}</span>}
+    <span class={`badge cat-${feature.data.category}`} style="margin-left:4px">类别 {feature.data.category}</span>
+    <span class="badge" style="margin-left:4px">工具链 {feature.data.toolchain}</span>
+    {seBadges.map((se) => <span class="badge se" style="margin-left:4px">{se}</span>)}
+  </p>
+  <h1>{feature.data.title}</h1>
+
+  {headings.filter((h) => h.depth === 2).length > 1 && (
+    <nav class="toc" aria-label="本文目录">
+      <strong>目录</strong>
+      <ul>
+        {headings
+          .filter((h) => h.depth === 2)
+          .map((h) => (
+            <li><a href={`#${h.slug}`}>{h.text}</a></li>
+          ))}
+      </ul>
+    </nav>
+  )}
+
+  <div class="prose">
+    <Content />
+  </div>
+
+  <Verify featureId={feature.data.id} />
+
+  <hr style="border:none;border-top:1px solid var(--border);margin:32px 0 16px" />
+  <div class="callout" style="font-size:13.5px">
+    <p style="margin:0 0 6px"><strong>本页验证口径：</strong>{categoryExplain[feature.data.category]}。{feature.data.category === 'C' ? '运行输出均来自本机真实执行日志，非手写预期。' : ''}</p>
+    <p style="margin:0">
+      {prev && <a href={`${base}features/${prev.id}/`}>← {prev.data.id} {prev.data.title}</a>}
+      {prev && next && ' · '}
+      {next && <a href={`${base}features/${next.id}/`}>{next.data.id} {next.data.title} →</a>}
+    </p>
+  </div>
+</Base>

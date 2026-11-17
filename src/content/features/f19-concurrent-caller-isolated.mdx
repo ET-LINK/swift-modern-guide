@@ -1,0 +1,60 @@
+---
+id: F19
+title: Caller-isolated async 与 @concurrent
+introduced: '6.2'
+versions: ['6.2']
+themes: ['concurrency']
+category: B
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0461 Async function isolation
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0461-async-function-isolation.md
+sampleIds:
+  - f19-after-typecheck
+  - f19-broken-concurrent-actor-touch
+summary: "@concurrent 显式「跳执行器并发跑」、nonisolated(nonsending) 显式「留在调用方」——执行器语义从隐含到可见。"
+
+---
+import after from '../../../examples/f19/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+`nonisolated async func` 到底在哪儿跑？6.1 及以前：**全局并发执行器**（隐含规则）。
+你想「在调用方的执行器上继续跑」写不出来；反过来真想并发的函数也没法显式声明。
+执行器语义全靠口口相传——性能调优与隔离推理都难。
+
+## 为什么变
+
+SE-0461 把执行器语义做成显式写法：
+
+- `@concurrent func`：显式跳到全局并发执行器（对应 6.1 的隐含行为）；
+- `nonisolated(nonsending) func`：留在**调用方的隔离域**继续执行（不上全局执行器）。
+
+配套 upcoming feature `NonisolatedNonsendingByDefault` 反转未标注 async 函数的缺省语义
+（默变 caller-isolated，要并发的函数改标 `@concurrent`）。这是 approachable concurrency 的执行器层。
+
+## 新写法
+
+<SwiftCode code={after} caption="after.swift · 两种显式写法（-swift-version 6 验证；flag 变体也在 manifest 内）" />
+
+## 诊断与「是否仍合法」
+
+- 新写法互不冲突；真被拒绝的是**违反隔离**的用法：broken 样本在 `@concurrent` 函数里同步调用
+  `@MainActor func`，诊断 `main actor-isolated global function 'refreshList()' cannot be called from outside of the actor`。
+  `@concurrent` 不是「去审计」，恰是把并发显式化后**审计更严**了。
+- upcoming flag 打开时未标注代码语义**改变**——这就是为什么它是 opt-in upcoming feature 而不是直接改默认。
+
+## 常见坑
+
+- `@concurrent` 只能标 async；标在同步方法上的报错本站也撞过（`cannot use @concurrent on non-async instance method`）。
+- caller-isolated 函数同步访问调用方持有的非 Sendable 更自由，但**别**以为替代了 region/sending——跨越真正的隔离边界还是要按 F05/F06 的规矩。
+
+## 迁移检查
+
+- [ ] 有性能假设的热点函数：显式写 `@concurrent`，别依赖隐含行为；
+- [ ] 评估 upcoming flag 前，先到 6.2 的 controllability（isolationRegions 等）都稳定再说。
+
+## 官方证据
+
+- SE-0461：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0461-async-function-isolation.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0461-async-function-isolation.md)

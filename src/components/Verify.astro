@@ -1,0 +1,107 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+
+/**
+ * Verify.astro —— 「本机验证」区块。
+ * 构建期读取 verification/ 下的 manifest 与真实日志，
+ * 页面只呈现运行器落盘的证据，不手写“预期输出”。
+ */
+
+const REPO = process.cwd();
+const manifest = JSON.parse(fs.readFileSync(path.join(REPO, 'verification/manifest.json'), 'utf8'));
+const results = JSON.parse(fs.readFileSync(path.join(REPO, 'verification/logs/results.json'), 'utf8'));
+
+interface Props {
+  featureId: string;
+}
+const { featureId } = Astro.props;
+
+const feature = manifest.features.find((f: { id: string }) => f.id === featureId);
+if (!feature) {
+  throw new Error(`Verify: unknown feature ${featureId}`);
+}
+
+const resultBySample = new Map<string, { status: string; exit: number; expect: string }>();
+for (const r of results.results ?? []) {
+  resultBySample.set(r.sampleId, r);
+}
+
+function excerpt(logName: string): string {
+  const logPath = path.join(REPO, 'verification/logs', `${logName}.log`);
+  const raw = fs.readFileSync(logPath, 'utf8');
+  const lines = raw.split('\n');
+  // 取“$ 命令行”起的执行段（每个步骤的命令 + 输出），保留诊断信息
+  const interesting: string[] = [];
+  let eating = false;
+  for (const line of lines) {
+    if (line.startsWith('$ ') || line.startsWith('# step ')) {
+      eating = true;
+      interesting.push(line);
+      continue;
+    }
+    if (line.startsWith('result: ') || line.startsWith('exit: ')) {
+      continue;
+    }
+    if (line.startsWith('# ')) {
+      // 头部元信息只保留 toolchain / expectations 行
+      if (line.startsWith('# started: ') || line.startsWith('# swift --version: ') || line.startsWith('# kind')) {
+        if (line.startsWith('# kind')) interesting.push(line);
+        continue;
+      }
+      continue;
+    }
+    if (eating) interesting.push(line);
+    if (interesting.length > 64) break;
+  }
+  return interesting.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+const samples = feature.samples.slice().sort((a: { kind: string }, b: { kind: string }) => {
+  const rank = ['prep', 'before', 'after', 'broken'];
+  return rank.indexOf(a.kind) - rank.indexOf(b.kind);
+});
+
+const allPass = samples.every((s: { id: string }) => resultBySample.get(s.id)?.status === 'pass');
+const kindLabel: Record<string, string> = {
+  prep: '准备步骤',
+  before: '旧写法',
+  after: '新写法',
+  broken: '应当失败的反例',
+};
+---
+<section class="verify-section" data-verify-section>
+  <h2 id="本机验证">
+    本机验证
+    {allPass ? <span class="badge ok">全部样本通过</span> : <span class="badge" style="color:var(--red);border-color:var(--red)">存在失败样本</span>}
+    <span class="badge">工具链 {feature.toolchain}</span>
+    <span class={`badge cat-${feature.category}`}>类别 {feature.category}</span>
+  </h2>
+  <table class="ver-table">
+    <thead>
+      <tr><th>样本</th><th>作用</th><th>模式</th><th>工具链</th><th>断言</th><th>状态</th><th>完整日志</th></tr>
+    </thead>
+    <tbody>
+      {samples.map((s: any) => {
+        const r = resultBySample.get(s.id);
+        return (
+          <tr>
+            <td style="font-family:ui-monospace,monospace;font-size:12px">{s.id}</td>
+            <td>{kindLabel[s.kind] ?? s.kind}</td>
+            <td style="font-family:ui-monospace,monospace;font-size:12px">{s.mode}</td>
+            <td>{s.toolchainId ?? feature.toolchain}</td>
+            <td>{s.expect === 'fail-with-diagnostic' ? `fail-with-diagnostic：${s.diagnosticSubstring}` : 'pass'}</td>
+            <td>{r?.status === 'pass' ? '✅ PASS' : `❌ ${r?.status ?? '未运行'}`}</td>
+            <td><a href={`${import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/'}logs/${s.id}.log`}>.txt</a></td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+  {samples.map((s: any) => (
+    <div class="verify-sample">
+      <div class="vs-title">{s.id}（{kindLabel[s.kind] ?? s.kind} · {s.mode}）</div>
+      <pre>{excerpt(s.id)}</pre>
+    </div>
+  ))}
+</section>

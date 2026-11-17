@@ -1,0 +1,20 @@
+# sample: f20-after-run
+# feature: F20 (InlineArray 与 [N of T] 语法糖)
+# kind: after | mode: run-swift | toolchain: swift-6.2
+# started: 2026-11-17T13:23:41.407Z finished: 2026-11-17T13:23:41.539Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f20/after.swift sha256=1ceadcc0bc056d60a0f93b8784fb640c4589d7ca5a1c788c3a8f5583f593260a
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f20/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+sum=10, count=4
+total=11
+
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

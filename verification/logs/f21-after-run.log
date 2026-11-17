@@ -1,0 +1,19 @@
+# sample: f21-after-run
+# feature: F21 (Span 与标准库 .span 视图)
+# kind: after | mode: run-swift | toolchain: swift-6.2
+# started: 2026-11-17T13:23:42.127Z finished: 2026-11-17T13:23:42.257Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f21/after.swift sha256=1241c6d15fe225c78ae16978d90239a97050e9afb8d7792a7eb3eeaafcbdc5ee
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f21/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+span sum: 60
+
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

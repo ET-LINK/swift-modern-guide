@@ -1,0 +1,62 @@
+---
+id: F16
+title: DocC 符号链接按参数/返回类型消歧
+introduced: '6.1'
+versions: ['6.1']
+themes: ['testing-tooling']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: Swift 6.1 发布说明 · DocC
+    url: https://www.swift.org/blog/swift-6.1-released/#swift-docc
+sampleIds:
+  - f16-docc-generate
+summary: "DocC 符号链接支持按参数/返回类型消歧——人能读懂地替代短哈希后缀。"
+---
+
+import mathsrc from '../../../examples/f16/pkg/Sources/F16Docs/Math.swift?raw';
+import indexmd from '../../../examples/f16/pkg/Sources/F16Docs/F16Docs.docc/index.md?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+两个重载：`combine(_: Int) -> Int` 与 `combine(_: Double) -> Double`。想在文档里链接后一个？
+旧 DocC 只认 `combine(_:)-3c5j` 这种**短哈希后缀**——人是解码不出来的，
+工具全靠 DocC 的 ambiguous 警告反向给你提示。写文档像解密。
+
+## 为什么变
+
+Swift 6.1 的 DocC 支持用**参数类型与返回类型**消歧：``combine(_:)->Double``。
+到底最少要写哪几个，DocC 的警告会一步步建议（Insert '->Double' 之类）——语义就在文字里，哈希退场。
+
+## 新写法
+
+<SwiftCode code={mathsrc} caption="Math.swift · 文档注释里的 typed link（``combine(_:)->Double`` 静默命中）" />
+
+<SwiftCode code={indexmd} lang="markdown" caption="index.md · 故意保留旧式 ambiguous 链接 ``combine(_:)`` 作对照" />
+
+## 诊断与「是否仍合法」
+
+本条验证最有说服力的正是一对真实警告（同一构建里同时出现，如日志）：
+
+```text
+warning: 'combine(_:)' is ambiguous at '/DoccDemo'
+  ├─ suggestion: Insert '->Double' for 'func combine(_ first: Double) -> Double'
+  ╰─ suggestion: Insert '->Int' for 'func combine(_ first: Int) -> Int'
+```
+
+typed 链接 ``combine(_:)->Double`` 无警告；哈希后缀写法仍然合法可用。
+官方入口见 [Ambiguous Symbol Links](https://docs.swift.org/documentation/docc/linking-to-symbols-and-other-content#Ambiguous-Symbol-Links)。
+
+## 常见坑
+
+- 需要 swift-docc-plugin 才能跑 `swift package generate-documentation`（本仓库 pin 官方 1.x 插件，构建时拉取一次）；
+- typed link 与哈希是两套语法：迁移期可以逐步替换，警告里的 suggestion 就是现成的迁移提示。
+
+## 迁移检查
+
+- [ ] grep 文档里的 `` `-` 开头哈希链接 ``，按 docc 建议 batch 替换为 typed 形式。
+
+## 官方证据
+
+- Swift 6.1 发布说明 · DocC：[https://www.swift.org/blog/swift-6.1-released/#swift-docc](https://www.swift.org/blog/swift-6.1-released/#swift-docc)

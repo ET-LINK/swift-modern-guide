@@ -1,0 +1,49 @@
+# sample: f33-broken-on-62
+# feature: F33 (Optional some / any 语法糖)
+# kind: broken | mode: typecheck | toolchain: swift-6.2
+# started: 2026-11-17T13:23:49.994Z finished: 2026-11-17T13:23:50.090Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f33/after.swift sha256=b3e1b39e797b4f5576252c04a6158d3fe7a0b0f5df6f82f764b372fe0d41cf5f
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "constrained to non-protocol, non-class type")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/after.swift:12:22: error: type 'some Traced?' constrained to non-protocol, non-class type '(any Traced)?'
+10 | }
+11 | 
+12 | func audit(_ v: some Traced?) -> String {
+   |                      `- error: type 'some Traced?' constrained to non-protocol, non-class type '(any Traced)?'
+13 |   guard let v else { return "none" }
+14 |   return "cost=\(v.cost())"
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/after.swift:18:16: error: optional 'any' type must be written '(any Traced)?'
+16 | 
+17 | struct Slot {
+18 |   var payload: any Traced? = nil      // optional any 同样免括号
+   |                `- error: optional 'any' type must be written '(any Traced)?'
+19 | }
+20 | 
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/after.swift:13:9: error: initializer for conditional binding must have Optional type, not 'some Traced?'
+11 | 
+12 | func audit(_ v: some Traced?) -> String {
+13 |   guard let v else { return "none" }
+   |         `- error: initializer for conditional binding must have Optional type, not 'some Traced?'
+14 |   return "cost=\(v.cost())"
+15 | }
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/after.swift:14:20: error: value of type 'some Traced?' has no member 'cost'
+12 | func audit(_ v: some Traced?) -> String {
+13 |   guard let v else { return "none" }
+14 |   return "cost=\(v.cost())"
+   |                    `- error: value of type 'some Traced?' has no member 'cost'
+15 | }
+16 | 
+
+--- end ---
+exit: 1
+result: PASS

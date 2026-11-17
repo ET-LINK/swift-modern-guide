@@ -1,0 +1,65 @@
+---
+id: F31
+title: defer 块中的 async 调用
+introduced: '6.4'
+versions: ['6.4']
+themes: ['concurrency']
+category: C
+toolchain: 'swift-6.4.2'
+officialSources:
+  - label: SE-0493 Support async calls in defer bodies
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0493-defer-async.md
+  - label: Swift 6.4 发布说明 · Simpler and clearer code
+    url: https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code
+sampleIds:
+  - f31-before-manual
+  - f31-after-run
+  - f31-broken-on-62
+summary: defer 里终于可以 await：清理逻辑与出口分离，且保证被完整执行——6.4 首发。
+---
+
+import before from '../../../examples/f31/before.swift?raw';
+import after from '../../../examples/f31/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+`func sendLog() async throws` 用 `defer { localLog.close() }` 保护——好日子到 async cleanup 为止：
+`defer` 块里**不允许** `await`。你只有两条烂路：每个出口手工补 `await cleanup()`（早退/throw 一定有人忘），
+或者 `defer { Task { await cleanup() } }`——「我们回头会清理的…吧」（时序失控、取消状态失控）。
+6.2 及以前的编译器对直接写法报：`'async' call cannot occur in a defer body`。
+
+## 为什么变
+
+SE-0493（Swift 6.4 实现）允许 defer 块中出现 `await`：作用域退出时这些清理被
+**隐式 await 到完成为止**（多个 defer 仍按声明的逆序执行）。清理与出口的数量彻底解耦——
+这也正是它与 F32 的搁 shield 搭配的地方：`defer { withTaskCancellationShield { ... } }`。
+
+## 旧写法与新写法
+
+<SwiftCode code={before} caption="before · 单出口手工 await（本机运行：输出顺序见日志；throw 一旦进来就漏）" />
+
+<SwiftCode code={after} caption="after · defer + await（本机运行：body done → flush logs → 返回，顺序确定）" />
+
+## 诊断与「是否仍合法」
+
+- 同一份 after.swift 在 6.2 下的运行结果就是最好的时间线证据：
+  `error: 'async' call cannot occur in a defer body`（broken 样本，真实命令在日志）；
+- before 的两种旧写法**都仍合法**——手工补的能继续用、detached Task 的也能编，
+  只是语义债不同：前者易漏，后者时序失去控制。如实分层，不制造假反差。
+
+## 常见坑
+
+- defer 块的隔离继承自**所在作用域**——closure 里推断 async 的规则别外推；
+- 「被 await 完」意味着**父级 await 的额外挂起点**：临界区/热点路径注意；
+- 取消状态照常可见：需要「无视取消的清理」时与 F32 组合（SE-0493 明确讨论过并独立成案）。
+
+## 迁移检查
+
+- [ ] 搜出 `Task { await ... }` inside defer 的「伪异步清理」，逐个改真；
+- [ ] 手工出口补清理的，回归为 defer 一个出口收口。
+
+## 官方证据
+
+- SE-0493：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0493-defer-async.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0493-defer-async.md)
+- Swift 6.4 发布说明：[https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code](https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code)

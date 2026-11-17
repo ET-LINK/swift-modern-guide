@@ -1,0 +1,64 @@
+---
+id: F05
+title: Region-based isolation
+introduced: '6.0'
+versions: ['6.0']
+themes: ['concurrency', 'memory-ownership']
+category: B
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0414 Region based isolation
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0414-region-based-isolation.md
+sampleIds:
+  - f05-before-workaround
+  - f05-after-transfer
+  - f05-broken-alias-after-transfer
+summary: 编译器按「隔离区域」推理非 Sendable 值的流转——新建即转走、不再使用就放行，拒绝留有活别名的转移。
+---
+
+import before from '../../../examples/f05/before.swift?raw';
+import after from '../../../examples/f05/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+`final class Ticket` 不是 Sendable。你只想把它**一次性交给 actor 保管**，之后调用方不再使用——
+这明明不可能有竞争。但 6.0 之前的检查一刀切：非 Sendable 过隔离边界就是错。
+于是大家给类型包 `@unchecked Sendable`「军令状」：编译器闭上眼，风险自负。
+
+## 为什么变
+
+SE-0414 引入**隔离区域（isolation region）**：编译器做流敏感分析，追踪「某个值和谁可能互达」。
+只要能证明转移后调用方不再持有该区域的任何引用，就把这次跨隔离域的转移判定为安全。
+效果是双向的：合法的代码不再误杀（对比 before），真正的竞争也没放过（对比 broken）。
+
+## 旧写法与新写法
+
+<SwiftCode code={before} caption="before · @unchecked Sendable 包装（仍合法，但安全口径全靠人肉）" />
+
+<SwiftCode code={after} caption="after · 新建 → 直接 transfer 进 actor → 之后不再碰" />
+
+## 诊断与「是否仍合法」
+
+- before 的写法**仍然合法**——本条特性不是禁掉什么，而是解除误杀、并在真危险的形态上给出精确诊断。
+- 真危险形态：转移后**区域里还有活着的别名**。broken 样本的诊断：
+  `sending 'first' risks causing data races`，note 会明确指出
+  「sending 'first' to actor-isolated instance method …」和「access can happen concurrently」——
+  指向别名 `alias` 的那一行。
+- 实现细节：这条诊断同样在完整编译时稳定出现（broken 样本用 compile 模式验证），typecheck 对部分区域案例不够完整。
+
+## 常见坑
+
+- 6.2 工具链采用**弱转移（weak transfer）**语义：`borrowing` 参数（actor 方法未留存值）的调用之后，
+  同一变量继续用不一定报错——编译器只有在对「区域整体仍被使用」有证据时才拦。
+  这不是漏报，是 SE-0414 文档里写明的弱转移模型；把别名留活才会被准确击中。
+- 区域合并与控制流有关：if/else 两个分支把同一值送进不同 actor，汇合点之后该值可能进入「invalid region」，再用就报错。
+
+## 迁移检查
+
+- [ ] 盘点现存的 `@unchecked Sendable`：哪些其实可以靠 region 转移直接删掉包装？
+- [ ] 逐字面量做：能 `consume` 的别 copy；确认转移后不再使用再加 `await` 的那次调用。
+
+## 官方证据
+
+- SE-0414：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0414-region-based-isolation.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0414-region-based-isolation.md)

@@ -1,0 +1,58 @@
+---
+id: F17
+title: swift-format 随官方工具链分发
+introduced: '6.0'
+versions: ['6.0']
+themes: ['testing-tooling']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: swift-format README · Included in the Swift toolchain
+    url: https://github.com/swiftlang/swift-format/blob/main/README.md
+sampleIds:
+  - f17-format-run
+summary: 不用再单独装 swift-format：6.0 起官方工具链自带（本机验证 swift-format 6.2.0）。
+---
+
+import before from '../../../examples/f17/before.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+想统一团队格式，swift-format 得各自安装：brew、pip、source build 各凭本事。
+版本漂移（formatter 5xx vs 6xx）= 格式 diff 噪音；CI 装 formatter 又是一层 yaml 折腾。
+**「工具链里没有格式化器」在 Swift 生态长期是实际状态。**
+
+## 为什么变
+
+swift-format（600.0.0 起）并入官方工具链：`usr/bin/swift-format` 随 6.0+ 工具链下发，
+本机实测版本号 `6.2.0`（见验证日志）。版本从此跟语言版本对齐，formatter 漂移问题退出历史。
+
+## 用法（真实命令样本）
+
+<SwiftCode code={before} caption="before.swift · 未格式化输入" />
+
+验证区的 f17-format-run 样本就是 `swift-format format before.swift` 的**完整原始输出**：
+那段代码被重排为规范缩进 —— 输出与输入不同由运行器断言（formatDiff=true），
+保证演示不是「手修过的假对比」。
+
+## 诊断与「是否仍合法」
+
+- 没有「旧写法报错」对照——本条是工具链覆盖能力，不是语言特性；
+  诚实标注：这不是 negative-case 特性，broken 样本不存在也**不该**被硬凑。
+- `swift-format format <file>`：stdout 输出格式化结果（本站用法）；
+  `--in-place` 改写文件；`--recursive` 目录级处理。
+
+## 常见坑
+
+- stderr 同文件有歧义时（无法 parse 的输入）退出码非 0 且带 `--ignore-unparsable-files` 相关提示；
+- 别人和你的 formatter 版本不一致仍是 diff 噪音——工具链自带后「锁工具链版本」顺带把 formatter 版本锁了，这是本特性真正的杀手锏。
+
+## 迁移检查
+
+- [ ] 团队格式化任务从「单独安装 swift-format」切到调用 toolchain 内二进制；
+- [ ] CI 明确锁 `swift --version` 以对齐 formatter 行为。
+
+## 官方证据
+
+- swift-format README（含 Included in the Swift toolchain 一节）：[https://github.com/swiftlang/swift-format/blob/main/README.md](https://github.com/swiftlang/swift-format/blob/main/README.md)

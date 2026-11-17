@@ -1,0 +1,38 @@
+# sample: f22-broken-werror
+# feature: F22 (Opt-in strict memory safety（-strict-memory-safety）)
+# kind: broken | mode: typecheck | toolchain: swift-6.2
+# started: 2026-11-17T13:23:43.037Z finished: 2026-11-17T13:23:43.117Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f22/broken.swift sha256=c6afea5e3bffd45b45dc3be328f07d9e3b369822c8b3e774181ca90517065f65
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "dangling pointer")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -strict-memory-safety -Werror TemporaryPointers /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f22/broken.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f22/broken.swift:8:9: error: initialization of 'UnsafeMutablePointer<Int>' results in a dangling pointer [#TemporaryPointers]
+ 6 | //   3) after 样本给出安全改写。
+ 7 | var values = [1, 2, 3]
+ 8 | let p = UnsafeMutablePointer(&values)    // 指针只在这次调用期间有效
+   |         |                    |- note: implicit argument conversion from '[Int]' to 'UnsafeMutablePointer<Int>' produces a pointer valid only for the duration of the call to 'init(_:)'
+   |         |                    `- note: use the 'withUnsafeMutableBufferPointer' method on Array in order to explicitly convert argument to buffer pointer valid for a defined scope
+   |         `- error: initialization of 'UnsafeMutablePointer<Int>' results in a dangling pointer [#TemporaryPointers]
+ 9 | _ = p.pointee                              // ← 已经悬垂
+10 | 
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f22/broken.swift:9:5: warning: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+ 7 | var values = [1, 2, 3]
+ 8 | let p = UnsafeMutablePointer(&values)    // 指针只在这次调用期间有效
+ 9 | _ = p.pointee                              // ← 已经悬垂
+   |     |- warning: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+   |     `- note: reference to let 'p' involves unsafe type 'UnsafeMutablePointer<Int>'
+10 | 
+
+[#StrictMemorySafety]: <https://docs.swift.org/compiler/documentation/diagnostics/strict-memory-safety>
+[#TemporaryPointers]: <https://docs.swift.org/compiler/documentation/diagnostics/temporary-pointers>
+
+--- end ---
+exit: 1
+result: PASS

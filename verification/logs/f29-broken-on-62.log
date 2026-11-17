@@ -1,0 +1,41 @@
+# sample: f29-broken-on-62
+# feature: F29 (@c 函数与枚举（C 互操作）)
+# kind: broken | mode: typecheck6 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:46.948Z finished: 2026-11-17T13:23:47.043Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f29/after.swift sha256=e9041c6c1ac2c1230476e9503920dbe09cc1312e43c56a0ac5e819d085d6f4a9
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "unknown attribute 'c'")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f29/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f29/after.swift:6:2: error: unknown attribute 'c'
+ 4 | //   2) 用 6.2 工具链编译同一文件证伪“旧版已支持”：
+ 5 | //      error: unknown attribute 'c'。
+ 6 | @c
+   |  `- error: unknown attribute 'c'
+ 7 | func addValues(_ a: CInt, _ b: CInt) -> CInt {
+ 8 |   a + b
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f29/after.swift:12:2: error: unknown attribute 'c'
+10 | 
+11 | // 可选参数：自定义 C 侧符号名
+12 | @c(CalculateFacade_multiply)
+   |  `- error: unknown attribute 'c'
+13 | func multiply(_ a: CInt, _ b: CInt) -> CInt {
+14 |   a * b
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f29/after.swift:18:2: error: unknown attribute 'c'
+16 | 
+17 | // @c 枚举：raw 值类型必须是 C 兼容整数；case 名映射为 LevelLow / LevelHigh
+18 | @c
+   |  `- error: unknown attribute 'c'
+19 | enum Level: CInt {
+20 |   case low
+
+--- end ---
+exit: 1
+result: PASS

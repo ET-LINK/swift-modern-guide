@@ -1,0 +1,49 @@
+# sample: f33-broken-composition
+# feature: F33 (Optional some / any 语法糖)
+# kind: broken | mode: typecheck | toolchain: swift-6.4.2
+# started: 2026-11-17T13:23:49.790Z finished: 2026-11-17T13:23:49.867Z
+# swift --version: Swift version 6.4.2 (swift-6.4.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f33/broken.swift sha256=ced4831a6dd78745d24c6869f0b70b10c6a61507fbba3cce85602b92a5daf3de
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "use parentheses to clarify precedence")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.4.2/usr/bin/swiftc -typecheck /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/broken.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/broken.swift:11:42: error: confusing use of optional after a 'some' or 'any' composition; use parentheses to clarify precedence
+ 9 | 
+10 | struct Rigid {
+11 |   func accept(_ v: some Traced & Sendable?) -> Int {
+   |                                          `- error: confusing use of optional after a 'some' or 'any' composition; use parentheses to clarify precedence
+12 |     v?.cost() ?? 0
+13 |   }
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/broken.swift:11:34: error: non-protocol, non-class type '(any Sendable)?' cannot be used within a protocol-constrained type
+ 9 | 
+10 | struct Rigid {
+11 |   func accept(_ v: some Traced & Sendable?) -> Int {
+   |                                  `- error: non-protocol, non-class type '(any Sendable)?' cannot be used within a protocol-constrained type
+12 |     v?.cost() ?? 0
+13 |   }
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/broken.swift:12:6: error: cannot use optional chaining on non-optional value of type 'some Traced & Sendable?'
+10 | struct Rigid {
+11 |   func accept(_ v: some Traced & Sendable?) -> Int {
+12 |     v?.cost() ?? 0
+   |      `- error: cannot use optional chaining on non-optional value of type 'some Traced & Sendable?'
+13 |   }
+14 | }
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f33/broken.swift:12:8: error: value of type 'some Traced & Sendable?' has no member 'cost'
+10 | struct Rigid {
+11 |   func accept(_ v: some Traced & Sendable?) -> Int {
+12 |     v?.cost() ?? 0
+   |        `- error: value of type 'some Traced & Sendable?' has no member 'cost'
+13 |   }
+14 | }
+
+--- end ---
+exit: 1
+result: PASS

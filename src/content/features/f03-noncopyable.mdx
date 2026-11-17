@@ -1,0 +1,66 @@
+---
+id: F03
+title: Noncopyable structs/enums、~Copyable 与所有权
+introduced: '5.9'
+expandedIn: '6.0'
+versions: ['5.9', '6.0']
+themes: ['memory-ownership']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0390 Noncopyable structs and enums
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0390-noncopyable-structs-and-enums.md
+sampleIds:
+  - f03-before-run
+  - f03-after-run
+  - f03-broken-consume
+summary: 常见误传纠正：~Copyable 首版是 Swift 5.9 而非 6.0；6.0 补上的是 noncopyable generics（见 F04）。
+---
+
+import before from '../../../examples/f03/before.swift?raw';
+import after from '../../../examples/f03/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 先纠偏：时间线
+
+`struct ... : ~Copyable`（SE-0390）**首版 Swift 5.9**；Swift 6.0 的新东西是「非复制类型进入泛型世界」（SE-0427，见 F04）。
+本页演示所有权模型本身——两个版本都能编，本站用 6.2 工具链验证。
+
+## 昨日症状
+
+用 `final class` 手工管理稀缺资源：`close()` 靠纪律只调一次。代码 review 时没人能保证第二次调用不会出现——
+因为语言层面「资源有没有被消耗」根本没有表达。重复 close、use-after-close 全是运行期问题。
+
+## 为什么变
+
+`~Copyable` 把「独占资源」写进类型系统：复制被禁止、`consume` 显式转移所有权、`deinit` 保证唯一清理。
+「这个值还能不能用」从纪律问题变成编译期事实。
+
+## 旧写法与新写法
+
+<SwiftCode code={before} caption="before.swift · class + 纪律（注意输出里第二次 close 也“成功”了）" />
+
+<SwiftCode code={after} caption="after.swift · ~Copyable + consuming + deinit（本机真实输出见验证区）" />
+
+## 诊断与「是否仍合法」
+
+- consume 之后继续使用：`error: 'conn' used after consume`（附 `note: consumed here`）。
+- **一个重要实现细节**：这个诊断在编译器 **SIL 阶段**发出——单纯 `-typecheck` 看不到它！
+  所以 broken 样本的验证模式是完整编译而不是 typecheck（这是刻意为之，不是疏忽）。
+- `consuming func close()` 让方法本身吃掉 self：`h.close()` 之后 `h` 不可再用；想保留就 `borrowing`。
+
+## 常见坑
+
+- struct 的会员级 init 只是「转移进」，别指望 ARC：~Copyable 没有 retain/release，一切都在所有权语义下。
+- 脚本顶层 `let` 是全局存储，`consume` 它不产生这里的错误形态——把验证样本包进函数里才干净。
+- `~Copyable` 的 struct 不能再 conform 到要求 Copyable 的协议（6.0 起协议可以用 `~Copyable` 约束参与，见 F04）。
+
+## 迁移检查
+
+- [ ] 资源型类型（文件句柄、连接、token）逐个换成 `~Copyable`；
+- [ ] handoff 一律 `consuming` 参数或显式 `consume`；
+- [ ] 原来的 `isClosed` 状态位删除——语言替你记着。
+
+## 官方证据
+
+- SE-0390：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0390-noncopyable-structs-and-enums.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0390-noncopyable-structs-and-enums.md)

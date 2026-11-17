@@ -1,0 +1,274 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = 'Swift 6.x 现代语言特性学习站：覆盖 6.0 → 6.4，示例经本机多工具链编译验证。' } = Astro.props;
+const rawBase = Astro.site ? Astro.site.pathname : '/';
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+const currentPath = Astro.url.pathname;
+const navItems = [
+  { href: `${base}`, label: '首页' },
+  { href: `${base}/features/`, label: '特性' },
+  { href: `${base}/themes/concurrency/`, label: '主题' },
+  { href: `${base}/migration/`, label: '迁移指南' },
+  { href: `${base}/verification/`, label: '验证' },
+  { href: `${base}/about/`, label: '关于' },
+];
+const isCurrent = (href: string) =>
+  href.endsWith('/') && href !== base
+    ? currentPath.startsWith(href)
+    : currentPath === href || currentPath === base;
+---
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" href={`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🦅</text></svg>`} />
+    <script is:inline>
+      // 尽早应用本机主题偏好，避免闪烁；只在本机保存偏好，不发送任何网络请求
+      (function () {
+        var stored = null;
+        try { stored = localStorage.getItem('smg-theme'); } catch (e) {}
+        var theme = stored === 'dark' || stored === 'light'
+          ? stored
+          : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <svg style="display:none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></symbol>
+    </svg>
+
+    <header class="site-header">
+      <a class="brand" href={`${base}/`}>Swift 6.x 现代特性</a>
+      <nav class="nav-links" aria-label="主导航">
+        {navItems.map((item) => (
+          <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+        ))}
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" id="search-open" type="button" aria-label="搜索（按 / 打开）" title="搜索（/）">
+          <svg aria-hidden="true"><use href="#i-search"></use></svg>
+        </button>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="切换深浅色主题" title="切换主题">
+          <svg aria-hidden="true" data-theme-icon-moon="1" style="display:none"><use href="#i-moon"></use></svg>
+          <svg aria-hidden="true" data-theme-icon-sun="1"><use href="#i-sun"></use></svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="main" class="layout">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="layout">
+        <p>
+          内容基于官方 release notes 与 Swift Evolution；
+          6.0–6.2 示例经本机 Swift 6.2 编译验证，6.3 示例经本机 Swift 6.3.3 验证，6.4 示例经本机 Swift 6.4.2 验证。
+          核验日期：2026-11-17。
+        </p>
+        <p>
+          <a href={`${base}/about/`}>来源政策与已知不足</a> ·
+          <a href={`${base}/verification/`}>验证总表</a> ·
+          MIT License © 2026 ET-LINK
+        </p>
+      </div>
+    </footer>
+
+    <dialog class="search-dialog" id="search-dialog" aria-label="站内搜索">
+      <div class="search-backdrop" data-close-search></div>
+      <div class="search-panel" role="search">
+        <div class="search-input-wrap">
+          <svg aria-hidden="true" width="18" height="18"><use href="#i-search"></use></svg>
+          <input
+            id="search-input"
+            type="search"
+            placeholder="搜索特性、SE 编号或关键词（如 typed throws / 并发 / SE-0413）"
+            aria-label="搜索关键词"
+            autocomplete="off"
+          />
+          <kbd style="font-size:11px;color:var(--fg-faint)">Esc 关闭</kbd>
+        </div>
+        <div class="search-results" id="search-results" aria-live="polite"></div>
+      </div>
+    </dialog>
+
+    <script>
+      const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+      const dialog = document.getElementById('search-dialog') as HTMLDialogElement;
+      const trigger = document.getElementById('search-open') as HTMLButtonElement;
+      // 主题切换：只写本机 localStorage
+      const themeBtn = document.getElementById('theme-toggle') as HTMLButtonElement;
+      themeBtn?.addEventListener('click', () => {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('smg-theme', next); } catch {}
+      });
+      function syncIcons() {
+        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.querySelector('[data-theme-icon-moon]')?.setAttribute('style', dark ? 'display:none' : '');
+        document.querySelector('[data-theme-icon-sun]')?.setAttribute('style', dark ? '' : 'display:none');
+      }
+      syncIcons();
+      themeBtn?.addEventListener('click', syncIcons);
+
+      // 搜索：首次打开时才拉取索引（NFKC 归一化的中英文 substring 匹配）
+      type IndexEntry = { slug: string; title: string; id: string; text: string; introduced: string };
+      let searchIndex: IndexEntry[] | null = null;
+      let loaded = false;
+      function normalize(s: string) {
+        return (s || '').normalize('NFKC').toLowerCase();
+      }
+      async function ensureIndex() {
+        if (loaded) return;
+        loaded = true;
+        try {
+          const res = await fetch(`${base}search-index.json`);
+          searchIndex = await res.json();
+        } catch {
+          searchIndex = [];
+        }
+      }
+      function openSearch() {
+        dialog.showModal();
+        (document.getElementById('search-input') as HTMLInputElement)?.focus();
+        ensureIndex();
+      }
+      trigger?.addEventListener('click', openSearch);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && !dialog.open && !isFormTarget(e.target)) {
+          e.preventDefault();
+          openSearch();
+        }
+        if (e.key === 'Escape' && dialog.open) {
+          dialog.close();
+        }
+      });
+      function isFormTarget(t: EventTarget | null) {
+        const el = t as HTMLElement;
+        return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+      }
+      dialog.querySelector('[data-close-search]')?.addEventListener('click', () => dialog.close());
+      dialog.addEventListener('close', () => trigger?.focus());
+
+      const results = document.getElementById('search-results') as HTMLElement;
+      const input = document.getElementById('search-input') as HTMLInputElement;
+      input?.addEventListener('input', async () => {
+        render(input.value);
+        if (!searchIndex) {
+          // 索引仍在路上：等加载完成后再用当前关键词补渲染一次
+          await ensureIndex();
+          render(input.value);
+        }
+      });
+      function render(q: string) {
+        if (!searchIndex) {
+          results.innerHTML = '<div class="search-empty">索引加载中，稍候再试…</div>';
+          return;
+        }
+        const nq = normalize(q.trim());
+        if (!nq) {
+          results.innerHTML = '<div class="search-empty">输入关键词开始搜索；支持中文 / 英文 / SE-XXXX 编号。</div>';
+          return;
+        }
+        const hits = searchIndex!
+          .map((e) => ({ e, hay: normalize(`${e.id} ${e.title} ${e.text}`) }))
+          .filter(({ hay }) => hay.includes(nq))
+          .slice(0, 24);
+        if (!hits.length) {
+          results.innerHTML = `<div class="search-empty">没有匹配「${escapeHtml(q)}」的结果。试试 SE-0413 / typed throws / 并发。</div>`;
+          return;
+        }
+        const dir = base.endsWith('/') ? base : `${base}/`;
+        results.innerHTML = hits
+          .map(
+            ({ e }) =>
+              `<a href="${dir}features/${e.slug}/"><span class="sr-id">${e.id}</span><span class="sr-title">${escapeHtml(e.title)}</span><span class="sr-hint">首版 ${e.introduced}</span></a>`,
+          )
+          .join('');
+      }
+      function escapeHtml(s: string) {
+        return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+      }
+
+      // 复制按钮（对构建产物中的所有代码块生效）
+      function wireCopy(scope: ParentNode = document) {
+        scope.querySelectorAll<HTMLElement>('.code-block').forEach((block) => {
+          const btn = block.querySelector('.copy-btn') as HTMLButtonElement | null;
+          if (!btn || btn.dataset.wired) return;
+          btn.dataset.wired = '1';
+          btn.addEventListener('click', async () => {
+            const codeEl = block.querySelector('pre code') || block.querySelector('pre');
+            const text = codeEl?.textContent ?? '';
+            const done = (state: 'ok' | 'fail') => {
+              btn.dataset.state = state;
+              btn.setAttribute('aria-label', state === 'ok' ? '已复制' : '复制失败');
+              setTimeout(() => {
+                delete btn.dataset.state;
+                btn.setAttribute('aria-label', '复制代码');
+              }, 1600);
+            };
+            try {
+              await navigator.clipboard.writeText(text);
+              done('ok');
+            } catch {
+              // 退化路径：非安全上下文 / 阻断的剪贴板
+              try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                done(ok ? 'ok' : 'fail');
+              } catch {
+                done('fail');
+              }
+            }
+          });
+        });
+      }
+      wireCopy();
+
+      // 版本筛选（渐进增强：无 JS 时全部可见）
+      const bar = document.querySelector('.filter-bar');
+      if (bar) {
+        const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-versions]'));
+        const counter = document.querySelector<HTMLElement>('.filter-count');
+        bar.addEventListener('click', (ev) => {
+          const btn = (ev.target as HTMLElement).closest('button[data-version]');
+          if (!btn) return;
+          bar.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          const v = btn.dataset.version;
+          let shown = 0;
+          cards.forEach((c) => {
+            const versions = (c.dataset.versions || '').split(',');
+            const show = v === 'all' || versions.includes(v!);
+            c.style.display = show ? '' : 'none';
+            if (show) shown++;
+          });
+          if (counter) counter.textContent = `${shown} 个特性`;
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+# sample: f29-emit-header
+# feature: F29 (@c 函数与枚举（C 互操作）)
+# kind: after | mode: emit-clang-header | toolchain: swift-6.3.3
+# started: 2026-11-17T13:23:46.668Z finished: 2026-11-17T13:23:46.819Z
+# swift --version: Swift version 6.3.3 (swift-6.3.3-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f29/after.swift sha256=e9041c6c1ac2c1230476e9503920dbe09cc1312e43c56a0ac5e819d085d6f4a9
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.3.3/usr/bin/swiftc -typecheck -emit-clang-header-path /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f29/f29_generated.h /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f29/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

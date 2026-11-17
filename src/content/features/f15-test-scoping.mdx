@@ -1,0 +1,55 @@
+---
+id: F15
+title: Swift Testing TestScoping（自定义 setup/teardown trait）
+introduced: '6.1'
+versions: ['6.1']
+themes: ['testing-tooling']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: ST-0007 Test Scoping Traits
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0007-test-scoping-traits.md
+sampleIds:
+  - f15-scoping-run
+summary: 自定义 trait 包一层 before/after 逻辑——共享的测试脚手架终于有官方挂点了。
+---
+
+import tests from '../../../examples/f15/pkg/Tests/ScopingTests/ScopingTests.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+一堆测试都要同样的前置（mock 凭据、临时任务本地值、上下文绑定）与清理。
+6.0 的做法：每个测试函数首尾手抄，或者抽普通函数在 @Test 里调用——反正**框架不知道**这层语义。
+失败信息、执行顺序、并行假设全都散落一地。
+
+## 为什么变
+
+ST-0007 引入 `TestScoping` 协议：自定义 trait 实现 `provideScope(for:testCase:performing:)`，
+就可以在测试/套件外围包一层受控作用域——比如打印/追踪、绑定 task-local、资源池的获取与归还。
+6.1 起 swift-testing 内置版本支持该协议。
+
+## 新写法
+
+<SwiftCode code={tests} caption="ScopingTests.swift · 自定义 trait 包 before/after（真实运行输出见验证区：before → 测试体 → after）" />
+
+## 诊断与「是否仍合法」
+
+- 每个测试级用 `.orderLogging` 这样的 trait 附加；套件级把同一 trait 放 `@Suite(...)`。
+- 执行顺序在日志里可见：`before: setup-counter for greetingScoping()` → 测试体 → `after: released`——
+  本站以 `swift test --disable-xctest` 的真实 stdout 断言（见验证区），非手绘示意。
+
+## 常见坑
+
+- scope 操作是异步的（`performing` 闭包 async throws），重资源初始化别在宏展开期做；
+- 多个 trait 叠加时的顺序按未定义/组合语义处理——关键顺序请自己测试观察，别依赖隐式。
+
+## 迁移检查
+
+- [ ] 找出所有「复制粘贴的前置调用」，改造成 TestScoping trait；
+- [ ] 顺手删掉各测试末尾配对的清理调用。
+
+## 官方证据
+
+- ST-0007：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0007-test-scoping-traits.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0007-test-scoping-traits.md)
+- Swift 6.1 发布说明 · Swift Testing：[https://www.swift.org/blog/swift-6.1-released/#swift-testing](https://www.swift.org/blog/swift-6.1-released/#swift-testing)

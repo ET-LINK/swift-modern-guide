@@ -1,0 +1,18 @@
+# sample: f23-after-typecheck
+# feature: F23 (Escaped identifiers / raw identifiers)
+# kind: after | mode: typecheck | toolchain: swift-6.2
+# started: 2026-11-17T13:23:43.242Z finished: 2026-11-17T13:23:43.331Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f23/after.swift sha256=8cc9138293d6b4d85c7b98c8d1681f0c47d6aabe06e2f909d943437a81e3d179
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f23/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

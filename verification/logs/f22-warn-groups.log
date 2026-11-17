@@ -1,0 +1,29 @@
+# sample: f22-warn-groups
+# feature: F22 (Opt-in strict memory safety（-strict-memory-safety）)
+# kind: before | mode: typecheck | toolchain: swift-6.2
+# started: 2026-11-17T13:23:42.830Z finished: 2026-11-17T13:23:42.912Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f22/broken.swift sha256=c6afea5e3bffd45b45dc3be328f07d9e3b369822c8b3e774181ca90517065f65
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f22/broken.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f22/broken.swift:8:9: warning: initialization of 'UnsafeMutablePointer<Int>' results in a dangling pointer [#TemporaryPointers]
+ 6 | //   3) after 样本给出安全改写。
+ 7 | var values = [1, 2, 3]
+ 8 | let p = UnsafeMutablePointer(&values)    // 指针只在这次调用期间有效
+   |         |                    |- note: implicit argument conversion from '[Int]' to 'UnsafeMutablePointer<Int>' produces a pointer valid only for the duration of the call to 'init(_:)'
+   |         |                    `- note: use the 'withUnsafeMutableBufferPointer' method on Array in order to explicitly convert argument to buffer pointer valid for a defined scope
+   |         `- warning: initialization of 'UnsafeMutablePointer<Int>' results in a dangling pointer [#TemporaryPointers]
+ 9 | _ = p.pointee                              // ← 已经悬垂
+10 | 
+
+[#TemporaryPointers]: <https://docs.swift.org/compiler/documentation/diagnostics/temporary-pointers>
+
+--- end ---
+exit: 0
+result: PASS

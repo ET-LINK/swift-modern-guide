@@ -1,0 +1,25 @@
+# sample: f31-broken-on-62
+# feature: F31 (defer 块中的 async 调用)
+# kind: broken | mode: run-swift | toolchain: swift-6.2
+# started: 2026-11-17T13:23:48.659Z finished: 2026-11-17T13:23:48.739Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f31/after.swift sha256=a43045fcff28176db95f2c35541d9a2cfb08f78fa48fc0ceddf06230dc3000af
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "'async' call cannot occur in a defer body")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f31/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f31/after.swift:22:11: error: 'async' call cannot occur in a defer body
+20 |   let session = Session(id: 7)
+21 |   defer {
+22 |     await flushLogs(session.id)   // ← 6.4 才能这样写
+   |           `- error: 'async' call cannot occur in a defer body
+23 |   }
+24 |   let result = await session.work()
+
+--- end ---
+exit: 1
+result: PASS

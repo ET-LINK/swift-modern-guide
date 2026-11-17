@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const themes = ['concurrency', 'type-system', 'memory-ownership', 'interop', 'testing-tooling'];
+  return themes.map((theme) => ({ params: { theme } }));
+}
+const { theme } = Astro.params;
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+const features = (await getCollection('features'))
+  .filter((f) => f.data.themes.includes(theme!))
+  .sort((a, b) => a.data.id.localeCompare(b.data.id));
+const themeNames: Record<string, { name: string; blurb: string }> = {
+  concurrency: {
+    name: '并发',
+    blurb: '从「Swift 6 mode 用编译器消灭数据竞争」到 region/sending 的精细转移、Mutex 的手动互斥、@concurrent 的执行器语义，再到 6.4 的取消屏蔽。这条线是 6.x 最大的一块。',
+  },
+  'type-system': {
+    name: '类型系统',
+    blurb: 'typed throws 把错误类型写进签名；trailing comma、raw identifiers 这类功能性改进让日常代码更顺手；optional some/any 语法糖收掉了烦人的括号。',
+  },
+  'memory-ownership': {
+    name: '内存与所有权',
+    blurb: '~Copyable 与所有权进入类型系统、泛型放开 ~Copyable 约束、InlineArray/Span 让「连续存储」既安全又可预期，strict memory safety 则是长期的安全水位线。',
+  },
+  interop: {
+    name: '互操作',
+    blurb: 'C++ 的 move-only / 虚函数 / 默认实参三类高频场景，C 的 @c 函数与枚举，再加 module selectors 处理重名冲突；Embedded Swift 也归在这条线。',
+  },
+  'testing-tooling': {
+    name: '测试与工具链',
+    blurb: 'Swift Testing 全家桶（入门、TestScoping、exit tests、attachments），SwiftPM 的 traits 与告警控制，DocC 的类型消歧链接，以及随工具链分发的 swift-format。',
+  },
+};
+const meta = themeNames[theme!]!;
+---
+<Base title={`${meta.name} · Swift 6.x 现代特性主题`} description={meta.blurb}>
+  <h1>主题：{meta.name}</h1>
+  <p>{meta.blurb}</p>
+  <div class="feature-grid">
+    {features.map((f) => (
+      <a class="feature-card" href={`${base}features/${f.id}/`}>
+        <div class="fc-top">
+          <span class="fc-id">{f.data.id}</span>
+          <span class="badge ver">{f.data.introduced}</span>
+          <span class={`badge cat-${f.data.category}`}>{f.data.category} 类</span>
+        </div>
+        <p class="fc-title">{f.data.title}</p>
+        <p class="fc-summary">{f.data.summary}</p>
+      </a>
+    ))}
+  </div>
+  <p style="margin-top:24px">
+    <a href={`${base}features/`}>← 返回全部特性</a>
+  </p>
+</Base>

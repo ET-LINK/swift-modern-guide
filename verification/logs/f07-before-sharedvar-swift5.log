@@ -1,0 +1,18 @@
+# sample: f07-before-sharedvar-swift5
+# feature: F07 (Mutex 与 Synchronization)
+# kind: before | mode: typecheck5 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:20.054Z finished: 2026-11-17T13:23:20.142Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f07/before.swift sha256=76b882d00901888cd5c3d551d8711d0a256f9b88f2b4b34c8158c5998f27613a
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 5 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f07/before.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

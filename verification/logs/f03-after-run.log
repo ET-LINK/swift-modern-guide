@@ -1,0 +1,22 @@
+# sample: f03-after-run
+# feature: F03 (Noncopyable structs/enums、~Copyable 与所有权)
+# kind: after | mode: run-swift | toolchain: swift-6.2
+# started: 2026-11-17T13:23:18.033Z finished: 2026-11-17T13:23:18.151Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f03/after.swift sha256=5d974e70b449b11bb62d1215b973ece376b4efe02870bc068d9280828d89e9f2
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f03/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+open a.txt
+close a.txt
+deinit a.txt
+scope ended
+
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

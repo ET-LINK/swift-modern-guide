@@ -1,0 +1,117 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import SwiftCode from '../components/SwiftCode.astro';
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+const features = await getCollection('features');
+const byId = new Map(features.map((f) => [f.data.id, f]));
+const link = (id: string) => {
+  const f = byId.get(id);
+  return f ? `${base}features/${f.id}/` : '#';
+};
+
+const fixableSample = `// 迁移期最常见的第一处错误（F01 broken 样本同款）：
+var status = 0                      // ← nonisolated global shared mutable state
+
+struct Syncer {
+  static func bump() { status += 1 } // ← Swift 6 mode 直接报错
+}
+
+// 修法 A（共享可变状态）：装进 actor
+actor StatusStore {
+  private var value = 0
+  func bump() -> Int { value += 1; return value }
+}
+
+// 修法 B（确属 main-thread-only）：上 @MainActor 标注并让调用方 await
+@MainActor struct UIState {
+  static var status = 0
+}`;
+---
+<Base title="从 5.9 迁移到 6.x：实操顺序 · Swift 6.x 现代特性" description="不加 @unchecked Sendable 大扫除的迁移路线：先清理、再逐模块开 Swift 6 mode，按需启用 6.2 的 easing 选项。">
+  <h1>从 5.9 迁到 6.x：实操顺序</h1>
+  <p>
+    这页的立场：<strong>一次性给全项目打 <code>@unchecked Sendable</code> 补丁是反模式</strong>。
+    它把「编译器不懂」翻译成「程序员拍胸脯」，之后真正的数据竞争一个都不会少。
+    下面是一步步来的顺序，每步都有可回退的落点。
+  </p>
+
+  <h2>第 0 步：盘点 module 边界</h2>
+  <p>
+    把代码按 module（App target / 各个 package）列出来，标注谁被共享、谁后台跑。
+    module 是并发检查的最小单位，之后所有开关都按 module 施行。
+  </p>
+
+  <h2>第 1 步：留在 Swift 5 模式，升级工具链</h2>
+  <p>
+    用新工具链编译旧模式代码是兼容的。先升级、跑通测试，再谈并发。
+    这一步的价值是把「语言版本」与「并发迁移」解耦。
+  </p>
+
+  <h2>第 2 步：开 complete checking 清理警告</h2>
+  <p>
+    在 Swift 5 模式加 <code>-strict-concurrency=complete</code>：
+    同一套检查此时只出 warning，按警告列清单，优先修「共享可变状态」与「跨 actor 访问」两类。
+    关于 global var 在这个模式下的表现，见 <a href={link('F01')}>F01（Swift 6 mode 与 data-race safety）</a>。
+  </p>
+
+  <h2>第 3 步：分模块开 Swift 6 mode</h2>
+  <p>
+    从叶子依赖（没有并发行为的库）开始开 <code>-swift-version 6</code>，
+    每个模块开完在 CI 固定住。6.0 的检查把「确有风险」变成 error（F01 的 broken 样本就是典型形态）：
+  </p>
+  <SwiftCode code={fixableSample} caption="最常见的第一处错误及两种修法" />
+
+  <h2>第 4 步：处理 Sendable / region / sending</h2>
+  <p>
+    开了 6 mode 后，跨隔离域的非 <code>Sendable</code> 值是主要报错来源。按性质分流：
+  </p>
+  <ul>
+    <li>真正共享的可变状态 → <a href={link('F07')}>Mutex（F07）</a> 或 actor（F01）</li>
+    <li>一次性转移、转移后调用方不再使用 → <a href={link('F05')}>region-based isolation（F05）</a> 与 <a href={link('F06')}>sending 参数（F06）</a>，不需要任何 unchecked</li>
+    <li>遗留类型实在标不出来 → <code>@unchecked Sendable</code> 才出场，且注释写清并发护栏</li>
+  </ul>
+
+  <h2>第 5 步：行为不变的减肥顺手做</h2>
+  <p>
+    <a href={link('F02')}>typed throws（F02）</a>、
+    <a href={link('F12')}>任务组类型推断（F12）</a>
+    这类不改变语义、只删样板代码的特性，可以在迁移中顺手采用，风险为零。
+  </p>
+
+  <h2>第 6 步：按需启用 6.2 的 easing 选项</h2>
+  <p>
+    新 App / 单线程明显的模块，可以用
+    <a href={link('F18')}><code>-default-isolation MainActor</code>（F18）</a>
+    一次性消掉顺序代码的假阳性；配套的
+    <a href={link('F19')}>NonisolatedNonsendingByDefault（F19）</a>
+    只在需要改变缺省执行器语义时开。这两个都是模块级开关，别全项目一拥而上。
+  </p>
+
+  <h2>第 7 步：处理部署 availability</h2>
+  <div class="callout warn">
+    <p>
+      <strong>重要边界</strong>：「编译器 6.x 可用」≠「旧系统可部署」。
+      <code>InlineArray</code>（F20）、<code>Span</code>（F21）、Mutex（F07）等标准库 API 在 Apple 平台对应 26 系列版本；
+      <a href={link('F32')}>cancellation shield（F32）</a>明文不能 back-deploy。
+      本站在 Linux host 上验证的是「语言/工具链可用性」，<strong>不能替代目标 OS 的可用性检查</strong>。
+    </p>
+  </div>
+
+  <h2>检查清单</h2>
+  <ul>
+    <li>每个模块的 language mode 与 concurrency 开关显式写在构建配置里</li>
+    <li><code>@unchecked Sendable</code> 每处都有注释说明护栏</li>
+    <li>全局可变变量归零（或全部 MainActor/actor 化）</li>
+    <li>新代码默认走 6.1+ 语法（typed throws 穷举、nonisolated extension）</li>
+    <li>CI 阶段锁定 <code>-swift-version 6</code></li>
+  </ul>
+
+  <h2>下一站</h2>
+  <p>
+    <a href={`${base}verification/`}>验证总表</a>给出全部 33 条特性 × 73 个样本的机器验证记录；
+    每篇特性页底部的「本机验证」区块给出原始日志入口。
+  </p>
+</Base>

@@ -1,0 +1,27 @@
+{
+  "name": "swift-modern-guide",
+  "version": "1.0.0",
+  "description": "Swift 6.x 现代语言特性学习站（中文，示例全部经本机编译/运行验证）",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "postbuild": "node scripts/copy-logs.mjs",
+    "preview": "node scripts/serve.mjs dist 4173",
+    "verify:samples": "node scripts/verify-examples.mjs",
+    "verify:pilot": "node scripts/verify-examples.mjs --only pilot",
+    "check:content": "node scripts/check-content.mjs",
+    "check:budget": "node scripts/check-budget.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "test:e2e": "playwright test",
+    "verify:all": "npm run verify:samples && npm run check:content && npm run build && npm run check:budget && npm run check:links && npm run test:e2e"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^8.1.6",
+    "astro": "^7.4.12"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  }
+}

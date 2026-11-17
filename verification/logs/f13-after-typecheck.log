@@ -1,0 +1,18 @@
+# sample: f13-after-typecheck
+# feature: F13 (更多位置的 trailing comma)
+# kind: after | mode: typecheck | toolchain: swift-6.2
+# started: 2026-11-17T13:23:24.181Z finished: 2026-11-17T13:23:24.267Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f13/after.swift sha256=ddd07c6e78a4868854e4da4a282ebc7622130f13e6eefe9dd65af97d82063646
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f13/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

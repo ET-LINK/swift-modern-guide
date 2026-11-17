@@ -1,0 +1,51 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const features = (await getCollection('features')).sort((a, b) => a.data.id.localeCompare(b.data.id));
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+const grouped = new Map<string, typeof features>();
+for (const f of features) {
+  for (const t of f.data.themes) {
+    if (!grouped.has(t)) grouped.set(t, []);
+    grouped.get(t)!.push(f);
+  }
+}
+const themeNames: Record<string, string> = {
+  concurrency: '并发',
+  'type-system': '类型系统',
+  'memory-ownership': '内存与所有权',
+  interop: '互操作',
+  'testing-tooling': '测试与工具链',
+};
+---
+<Base title="全部特性 · Swift 6.x 现代语言特性" description="全部 33 条 Swift 6.x 特性一览，支持版本/主题双视角浏览。">
+  <h1>全部特性</h1>
+  <p>共 {features.length} 条，按 ID 排序；每条都标明首次可用版本、验证类别（A=类型检查 / B=Swift 6 模式类型检查 / C=实际运行）与工具链。</p>
+  <div class="feature-grid">
+    {features.map((f) => (
+      <a class="feature-card" href={`${base}features/${f.id}/`}>
+        <div class="fc-top">
+          <span class="fc-id">{f.data.id}</span>
+          <span class="badge ver">{f.data.introduced}</span>
+          <span class={`badge cat-${f.data.category}`}>{f.data.category} 类</span>
+        </div>
+        <p class="fc-title">{f.data.title}</p>
+        <p class="fc-summary">{f.data.summary}</p>
+      </a>
+    ))}
+  </div>
+
+  <h2>按主题</h2>
+  {[...grouped.entries()].map(([theme, fs]) => (
+    <section>
+      <h3>
+        <a href={`${base}themes/${theme}/`}>{themeNames[theme] ?? theme}</a>（{fs.length}）
+      </h3>
+      <p style="color:var(--fg-muted);font-size:13.5px">
+        {fs.map((f) => f.data.id).join(' · ')}
+      </p>
+    </section>
+  ))}
+</Base>

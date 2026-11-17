@@ -1,0 +1,58 @@
+---
+id: F10
+title: Swift Testing 入门与迁移
+introduced: '6.0'
+versions: ['6.0']
+themes: ['testing-tooling']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: Swift 6 发布说明 · Swift Testing
+    url: https://www.swift.org/blog/announcing-swift-6/#swift-testing
+sampleIds:
+  - f10-build-tests
+  - f10-testing-only
+summary: 随工具链分发的现代测试框架：@Test 宏、#expect 表达式断言、参数化天生支持；一个包里新旧共存。
+---
+
+import modern from '../../../examples/f10/pkg/Tests/ModernTests/ModernTests.swift?raw';
+import legacy from '../../../examples/f10/pkg/Tests/LegacyTests/LegacyTests.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+XCTestcase 的模板代码：`final class FooTests: XCTestCase`、`func testBar`、`XCTAssertEqual` 前缀全家桶。
+参数化靠 for 循环（失败信息不解析）、并行行为看运气。这些都能忍——忍不了的是：
+**新框架的下一代能力（见 F15/F26/F27）全都不会回填 XCTest**。5.x 生态淘汰速度会超出直觉。
+
+## 为什么变
+
+Swift Testing 是 swift.org 的官方测试栈（2024 preview → 6.0 正式随工具链分发）：
+`@Test` 宏注册、`#expect` 捕获表达式与求值上下文、参数化一等公民、并发化执行、与 Xcode 16+/VS Code 集成。
+
+## 旧写法与之后新旧共存
+
+<SwiftCode code={legacy} caption="LegacyTests · XCTeset 写法（仍合法，本包内已编译验证）" />
+
+<SwiftCode code={modern} caption="ModernTests · @Test + #expect + 参数化（真实 swift test 运行输出见验证区）" />
+
+## 诊断与「是否仍合法」
+
+- XCTest 完全合法、长期共存。`swift test --disable-xctest` 只跑 Swift Testing 目标；`swift test` 两种测试引擎联跑。
+- 迁移可以按测试类逐个来：同一 target 里 `import Testing` 与 `import XCTest` 不相斥。
+
+## 常见坑
+
+- `#expect(lhs == rhs)` 表达式整体是被宏捕获的，失配时输出两侧子表达式的值——别再手写 message 除非真有上下文要补充。
+- 参数化的失败粒度是「参数组内一组一条」：`@Test(arguments: [...])` 的输出天然按 case 拆分。
+- 6.0 的 Swift Testing 版本对应工具链演进，老的语言模式（5.x）也能用，但 trait 相关新能力看 ST 提案落地版本。
+
+## 迁移检查
+
+- [ ] 新增测试一律 Swift Testing；
+- [ ] 老的 XCTestCase 按「改动多的先迁」原则回归替换；
+- [ ] CI 里 `swift test` 与 `swift test --disable-xctest` 都过一遍（后者的信号更纯）。
+
+## 官方证据
+
+- Swift 6 发布说明 · Swift Testing：[https://www.swift.org/blog/announcing-swift-6/#swift-testing](https://www.swift.org/blog/announcing-swift-6/#swift-testing)

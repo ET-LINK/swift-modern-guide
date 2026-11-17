@@ -1,0 +1,30 @@
+# sample: f05-broken-alias-after-transfer
+# feature: F05 (Region-based isolation)
+# kind: broken | mode: compile6 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:19.134Z finished: 2026-11-17T13:23:19.249Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f05/broken.swift sha256=8bf3be7cef6ffab2033b802b29df439ac57ca9316eccac6cbf4489576de8417f
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "risks causing data races")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f05/broken.swift -o /tmp/multica-task-4124751358/smg-f05-broken-alias-after-transfer-238492
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f05/broken.swift:22:21: error: sending 'first' risks causing data races [#SendingRisksDataRace]
+20 |   let first = Ticket(seat: "1A")
+21 |   let alias = first            // alias 与 first 同属一个隔离区域
+22 |   await BoxOffice().register(first)  // 区域整体转移进 actor
+   |                     |- error: sending 'first' risks causing data races [#SendingRisksDataRace]
+   |                     `- note: sending 'first' to actor-isolated instance method 'register' risks causing data races between actor-isolated and local nonisolated uses
+23 |   print(alias.seat)            // 还想用区域里的别名 → 数据竞争风险，编译失败
+   |               `- note: access can happen concurrently
+24 | }
+25 | 
+
+[#SendingRisksDataRace]: <https://docs.swift.org/compiler/documentation/diagnostics/sending-risks-data-race>
+
+--- end ---
+exit: 1
+result: PASS

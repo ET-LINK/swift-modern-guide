@@ -1,0 +1,90 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+const title = '验证总表 · 每条特性都跑过';
+const REPO = process.cwd();
+const manifest = JSON.parse(fs.readFileSync(path.join(REPO, 'verification/manifest.json'), 'utf8'));
+const results = JSON.parse(fs.readFileSync(path.join(REPO, 'verification/logs/results.json'), 'utf8'));
+
+const byS = new Map<string, { status: string; exit: number }>();
+for (const r of results.results ?? []) byS.set(r.sampleId, r);
+
+const features = await getCollection('features');
+const byId = new Map(features.map((f) => [f.data.id, f]));
+
+const totalSamples = manifest.features.reduce((n: number, f: any) => n + f.samples.length, 0);
+const failed = (results.results ?? []).filter((r: any) => r.status !== 'pass').length;
+const runAt = results.finishedAt;
+const toolchainNote = manifest.toolchains
+  .map((t: any) => {
+    const m = /Swift version (\S+)/.exec(results.toolchains?.[t.id]?.version ?? '');
+    return `${t.id}（${m?.[1] ?? '?'}）`;
+  })
+  .join('、');
+---
+<Base title={title} description="33 条特性、全部样本的命令、退出码与原始日志索引；构建时读取真实验证数据。">
+  <h1>验证总表</h1>
+  <p>
+    本页在<strong>构建时</strong>读取 <code>verification/results.json</code> 与逐样本日志渲染，
+    不是手写表格。总计 <strong>{manifest.features.length}</strong> 条特性、
+    <strong>{totalSamples}</strong> 个样本；最近一次完整验证：
+    <code>{runAt}</code>，工具链 {toolchainNote}，
+    结果 <strong>{failed === 0 ? '全部通过' : `${failed} 个失败`}</strong>。
+  </p>
+
+  <table class="ver-table">
+    <thead>
+      <tr>
+        <th>ID</th><th>特性</th><th>首版</th><th>类别</th><th>工具链</th><th>样本</th><th>状态</th><th>日志</th>
+      </tr>
+    </thead>
+    <tbody>
+      {manifest.features.map((f: any) => {
+        const entry = byId.get(f.id);
+        const allPass = f.samples.every((s: any) => byS.get(s.id)?.status === 'pass');
+        return (
+          <tr>
+            <td>{f.id}</td>
+            <td>
+              {entry ? <a href={`${base}features/${entry.id}/`}>{f.title}</a> : f.title}
+            </td>
+            <td>{f.introduced}</td>
+            <td><span class={`badge cat-${f.category}`}>{f.category}</span></td>
+            <td style="font-family:ui-monospace,monospace;font-size:12px">{f.toolchain}</td>
+            <td>{f.samples.map((s: any) => (
+              <div style="font-family:ui-monospace,monospace;font-size:11.5px">
+                <a href={`${base}logs/${s.id}.log`}>{s.id}</a> {byS.get(s.id)?.status === 'pass' ? '✅' : '❌'}
+              </div>
+            ))}</td>
+            <td>{allPass ? <span class="badge ok">全通过</span> : <span class="badge" style="color:var(--red);border-color:var(--red)">有失败</span>}</td>
+            <td><a href={`${base}features/${entry?.id ?? ''}/#本机验证`}>验证区块</a></td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+
+  <h2>验证类别说明</h2>
+  <ul>
+    <li><strong>A 类</strong>：不需要运行，<code>swiftc -typecheck</code>（必要时带 flag）通过即可验证。</li>
+    <li><strong>B 类</strong>：并发相关语义，必须在 <code>-swift-version 6</code> 下做类型检查。</li>
+    <li><strong>C 类</strong>：实际运行并记录真实 stdout/stderr，输出不得手写。含 SwiftPM 构建、swift test、DocC 生成、swift-format 等真实工具链调用。</li>
+    <li><strong>负例（fail-with-diagnostic）</strong>：必须以非零退出码 + 指定的诊断子串失败；「编译失败」本身不能当证据。</li>
+  </ul>
+
+  <h2>如何独立复验</h2>
+  <p>
+    仓库 README 给出完整路径：checkout 后用 <code>scripts/fetch-toolchains.sh</code> 装齐三套工具链到
+    <code>.toolchains/</code>，然后 <code>npm run verify:samples</code>。
+    运行器按 manifest 逐样本执行、落盘 <code>verification/logs/*.log</code>，
+    任何断言失败都会让整个命令以非零退出码结束。
+  </p>
+  <div class="callout">
+    <p>日志按需打开：上面每个样本 ID 都链到独立 <code>.log</code> 文本（含完整 argv、工作目录、stdout/stderr 与退出码）。不进任何首屏 bundle。</p>
+  </div>
+</Base>

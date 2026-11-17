@@ -1,0 +1,27 @@
+# sample: f17-format-run
+# feature: F17 (swift-format 随官方工具链分发)
+# kind: after | mode: format | toolchain: swift-6.2
+# started: 2026-11-17T13:23:40.422Z finished: 2026-11-17T13:23:40.445Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f17/before.swift sha256=3d2c2b5c61b10927cd425294ce20efc55127e97bc3eede91b6269815626c29d3
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift-format format /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f17/before.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+// F17 before —— 未格式化源码样本。
+// swift-format format 把它按官方代码风格重排（见验证日志"),
+// 这正是 F17 的核心交付：工具链自带 swift-format，无需单独安装。
+struct Foo {
+  var x = 1
+  func bar() -> Int { return x }
+}
+let f = Foo()
+_ = f.bar()
+
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

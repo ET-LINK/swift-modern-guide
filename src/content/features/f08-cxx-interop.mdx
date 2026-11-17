@@ -1,0 +1,63 @@
+---
+id: F08
+title: C++ 互操作：move-only、virtual methods、default arguments
+introduced: '5.9'
+expandedIn: '6.0'
+versions: ['5.9', '6.0']
+themes: ['interop']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: Swift 6 发布说明 · C++ interoperability
+    url: https://www.swift.org/blog/announcing-swift-6/#c-interoperability
+sampleIds:
+  - f08-build-run
+summary: 双向互操作本体 5.9 已可用；6.0 把 move-only 类型、虚函数派发、默认实参这三类高频场景磨到能用。
+---
+
+import runner from '../../../examples/f08/pkg/Sources/F08Runner/main.swift?raw';
+import header from '../../../examples/f08/pkg/Sources/CppLib/include/lib.hpp?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+5.9 打开 C++ 互操作大门后，`swiftc -cxx-interoperability-mode=default` 能 import C++ 头，
+但一碰真实代码全是墙：**move-only 的 C++ 类型进不来**（复制语义对不上）、
+**虚函数不敢跨语言派发**（引用所有权没说清）、**默认实参看不见**（每个调用点手抄 magic number）。
+6.0 逐个拆墙——注意这是打磨，不是新开一门语言。
+
+## 为什么变
+
+Swift 6 的互操作版图按「把 C++ 的语义映射到 Swift 的语义」推进：move-only 映射到 ~Copyable，
+参与引用继承的类用 `SWIFT_SHARED_REFERENCE` / `SWIFT_IMMORTAL_REFERENCE`（`swift/bridging` 头文件）声明引用所有权，
+默认实参则展开为两个重载导出。
+
+## 新写法（C++ 侧 + Swift 侧）
+
+<SwiftCode code={header} lang="cpp" caption="lib.hpp · 三类场景的 C++ 侧（注意 SWIFT_IMMORTAL_REFERENCE 标注——没有它虚函数派发免谈）" />
+
+<SwiftCode code={runner} caption="F08Runner/main.swift · Swift 侧消费 move-only token、虚派发取面积、省略默认实参" />
+
+## 诊断与「是否仍合法」
+
+- 环境边界（如实证）：`SWIFT_*_REFERENCE` 标注未加时，`class SWIFT_SHARED_REFERENCE` 会被当作未知类型名拒绝导入；
+  6.2 官方标注宏的完整定义在工具链 `usr/include/swift/bridging`，样例通过 `#filePath` 相对定位该 include 路径（manifest 不提交机器路径）。
+- 本样例走真实的 SwiftPM 构建：`.interoperabilityMode(.Cxx)`、C++ target 与 Swift target 联链路验证（见日志）。
+
+## 常见坑
+
+- C++ 的 `int` 导入为 `Int32`：截位/转换自己当心。
+- 默认实参展开成重载：**带 label 的参数名以 C++ 声明为准**，`withDefaultArgument(0, 12)`，没有 `delta:` label。
+- 虚函数样例中的类标注 `SWIFT_IMMORTAL_REFERENCE` 是简化（静态实例生命周期）；引用计数管理的类应该用
+  `SWIFT_SHARED_REFERENCE(retainFn, releaseFn)` 并提供真实的 retain/release。
+- iOS/ObjC 环境不在本站验证范围（Ubuntu host 实证，见「关于」）。
+
+## 迁移检查
+
+- [ ] C++ target 的 include 查找路径交给构建系统，不在业务代码里 hardcode；
+- [ ] 需要交给 Swift 继承/长期持有的 C++ 类：补上引用所有权标注；
+- [ ] 逐 public API 检查 `int`→`Int32` 这类映射的类型宽度。
+
+## 官方证据
+
+- Swift 6 发布说明 · C++：[https://www.swift.org/blog/announcing-swift-6/#c-interoperability](https://www.swift.org/blog/announcing-swift-6/#c-interoperability)

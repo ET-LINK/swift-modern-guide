@@ -1,0 +1,63 @@
+---
+id: F06
+title: sending 参数与结果
+introduced: '6.0'
+versions: ['6.0']
+themes: ['concurrency']
+category: B
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0430 Transferring parameters and results
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0430-transferring-parameters-and-results.md
+sampleIds:
+  - f06-before-unchecked
+  - f06-after-sending
+  - f06-broken-use-after-send
+summary: 把「这个参数交给你之后我就不再拥有」写进函数签名；和 region 隔离是同一枚硬币的两面。
+---
+
+import before from '../../../examples/f06/before.swift?raw';
+import after from '../../../examples/f06/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+要让另一个隔离域「接管」一份数据，你只能：(1) 把类型标成 `@unchecked Sendable` 祈祷；(2) 深拷贝一份再传；
+(3) 干脆让数据永远困在一个 actor 里。函数签名上，**「我转移给你」和「我借你看看」长得一模一样**——
+API 文档靠注释，编译器帮不上任何忙。
+
+## 为什么变
+
+SE-0430 给参数/返回值加了 `sending` 修饰符：显式声明「跨隔离域移动、调用方不再拥有」。
+它和 SE-0414 region 分析一体两面：region 证安全的地方隐式放行，`sending` 让 API 作者把
+「我确实要拿走这份资源」写成机器可读的契约。
+
+## 旧写法与新写法
+
+<SwiftCode code={before} caption="before · @unchecked Sendable 硬闯（仍合法）" />
+
+<SwiftCode code={after} caption="after · sending 参数声明移动契约" />
+
+## 诊断与「是否仍合法」（6.2 实测，如实记录）
+
+- 可复制类型的场景有个**诚实的边界**：在 6.2 工具链上，`sending` 移动可复制值后同一变量再用，
+  由于弱转移模型的容差，**未必**触发编译诊断；真正的硬错误出现在两个地方：
+  1. 区域里还留着活别名，转移即「sending 'x' risks causing data races」；
+  2. `sending` 与 `~Copyable` 组合时，ownership（borrowing/consuming）必须显式——broken 样本演示的正是这条。
+- 也就是说：`sending` 的价值先是 **API 语义自文档化**（工具链、静态分析、读者三方受益），
+  加上对所有权敏感路径的强制。
+
+## 常见坑
+
+- `sending` 不能和 `borrowing`/`inout` 混用在 ~Copyable 上而不声明——诊断原文见 broken 样本
+  （`parameter of noncopyable type 'Peg' must specify ownership`）。
+- actor 的初始化是天然的 transferring 边界：actor init 拿走的非 Sendable 参数本就处于转移语义下。
+
+## 迁移检查
+
+- [ ] 接口评审：凡是「传给你之后我就不管了」的参数，逐个加 `sending`；
+- [ ] 配合 region 分析删除能删的 `@unchecked Sendable` 包装（见 F05）。
+
+## 官方证据
+
+- SE-0430：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0430-transferring-parameters-and-results.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0430-transferring-parameters-and-results.md)

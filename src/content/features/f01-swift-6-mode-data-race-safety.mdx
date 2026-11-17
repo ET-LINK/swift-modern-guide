@@ -1,0 +1,67 @@
+---
+id: F01
+title: Swift 6 language mode 与 data-race safety
+introduced: '6.0'
+versions: ['5.10', '6.0']
+themes: ['concurrency']
+category: B
+toolchain: swift-6.2
+officialSources:
+  - label: Swift 6 发布说明 · Concurrency
+    url: https://www.swift.org/blog/announcing-swift-6/#concurrency
+sampleIds:
+  - f01-before-swift5
+  - f01-after-swift6
+  - f01-broken-swift6
+summary: 把并发检查从「可选 warning」升级为「编译错误」的语言模式；全局可变状态是第一个撞墙点。
+---
+
+import before from '../../../examples/f01/before.swift?raw';
+import after from '../../../examples/f01/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+代码里有一个顶层 `var status`，某天你把工程的 SWIFT_VERSION 调成 6，或给某个 Module 打开 `-swift-version 6`：
+瞬间几十条 error 而不是 warning——`var 'status' is not concurrency-safe because it is nonisolated global shared mutable state`。
+而这份一模一样的代码在 Swift 5 模式下编译得悄无声息。
+
+## 为什么变
+
+Swift Concurrency 的承诺是「编译期排除数据竞争」。5.x 时代靠手动开启 `-strict-concurrency` 分级（minimal/targeted/complete），
+5.10 才有接近完整的 complete checking，但仍是 **warning**；Swift 6 language mode 把这套检查默认升格为 **error**。
+变化只在「开关的默认位置」，检查器本身已经打磨了几个版本——所以迁移策略是先在 5 模式开 complete 清警告，再切 6（见迁移指南）。
+
+## 旧写法（在 Swift 5 模式下仍然合法）
+
+<SwiftCode code={before} caption="before.swift · Swift 5 mode 下零警告通过" />
+
+## 新写法
+
+<SwiftCode code={after} caption="after.swift · actor 化后，同一职责在 Swift 6 mode 下合法" />
+
+## 诊断与「是否仍合法」
+
+- 同一份 `before.swift` 在 Swift 6 mode 下被拒绝，诊断原文见下方「本机验证」的 f01-broken-swift6 样本：
+  `var 'status' is not concurrency-safe because it is nonisolated global shared mutable state`，并附 4 条修复 note。
+- 注意一个细节：如果文件里有顶层语句，`swiftc` 会按 script 处理，顶层变量被推断到 MainActor；想复现教科书式诊断需要
+  `-parse-as-library`（manifest 里就是这么写的）。
+
+## 常见坑
+
+- **`static var` 同样中招**：static 可变存储与全局变量同罪；`static let` 则没事。
+- **`let` 全局常量是安全的**：不可变 + Sendable 类型直接放行——这也是诊断 note 的第一条建议。
+- **`@MainActor` 标注不是银弹**：标注全局 var 后，非隔离上下文访问它换来的错误是「main actor-isolated var … cannot be mutated from a nonisolated context」
+  （见 F18 的对照实验），本质仍是把并发问题显式化。
+- **一群 warning 升级成一群 error 时别 panic**：修法永远是三选一——收进 actor、标 `@MainActor`、变成 `let`。
+
+## 迁移检查
+
+- [ ] 构建配置里显式给每个 module 指定 language mode；
+- [ ] 全局/静态可变变量清单化：要么 actor、要么 MainActor、要么 `let`；
+- [ ] 先开 `-strict-concurrency=complete` 在 5 模式清警告，再切 6 mode（一次性切容易把真 bug 与假阳性混在一起）。
+
+## 官方证据
+
+- Swift 6 发布说明 · Concurrency：[https://www.swift.org/blog/announcing-swift-6/#concurrency](https://www.swift.org/blog/announcing-swift-6/#concurrency)
+- 迁移实操顺序见本站 [迁移指南](/swift-modern-guide/migration/)。

@@ -1,0 +1,75 @@
+---
+id: F32
+title: Task cancellation shield
+introduced: '6.4'
+versions: ['6.4']
+themes: ['concurrency']
+category: C
+toolchain: 'swift-6.4.2'
+officialSources:
+  - label: SE-0504 Task cancellation shields
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0504-task-cancellation-shields.md
+  - label: Swift 6.4 发布说明
+    url: https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code
+sampleIds:
+  - f32-before-detached
+  - f32-after-run
+summary: withTaskCancellationShield 屏蔽区间内「看不到取消」——清理必须在被取消的任务里也能完整跑完。
+---
+
+import before from '../../../examples/f32/before.swift?raw';
+import after from '../../../examples/f32/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+任务被取消后，你调的清理代码可能**自己检查取消**然后提前返回（或 `Task.sleep` 抛 `CancellationError`）——
+清理就这样半途而废。唯一的 workaround 是非结构化 Task：
+`await Task { resource.cleanup() }.value`——跳出任务树、额外调度、时序更飘，SE-0504 motivation 原文如此复刻。
+
+## 为什么变
+
+SE-0504（Swift 6.4，**不可 back-deploy**——要 runtime 支持）引入 cancellation shield：
+
+- `withTaskCancellationShield { ... }` 期间**屏蔽「观察」**：`Task.isCancelled` 读到 `false`、
+  `checkCancellation` 不抛、cancellation handler 不触发；
+- 子任务（async let / group）**不会被自动传染**取消；
+- 出了区间，真实状态立刻恢复（外层任务当前是取消状态就还是取消——shield 不是「取消」本身）。
+
+## 新写法（真实输出在验证区）
+
+<SwiftCode code={before} caption="before · SE-0504 motivation 原形的 workaround：detached cleanup（本机编译运行通过）" />
+
+<SwiftCode code={after} caption="after · 父组 cancelAll() 后：外部观察到 cancelled=true，shield 内部读到 false，清理跑完" />
+
+本站运行器通过一次性构建＋真实输出断言这张**确定性的快照**：
+
+```text
+work start
+observed cancellation: true
+cleanup: cancelled=false      ← shield 区间内
+main: still fine
+```
+
+no sleep/随机/竞态技巧——条件由 `Task.yield()` 循环与结构化 group 保证。
+
+## 诊断与「是否仍合法」
+
+- detached workaround **仍合法**——本站同时验证它作为 before 样本（真实运行）；
+- `Task.name` 类静态读取在 shield 内为 false；外部 handle 的 `task.isCancelled` 仍是真实值（实例查询不受 shield 保护面影响）。
+
+## 常见坑
+
+- shield 保护的是**观察**，不是魔法不可中断：CPU 热循环没有挂起点照样继续（所以它跟 async 清理配合才完整）；
+- shield 区间里创建的子任务（async let / group）**不会被自动传染**取消——这是文档明确的行为，见 SE-0504 的示例；
+- 查询自身 shield 状态可用 Task.hasActiveCancellationShield（节内亦有 UnsafeCurrentTask 形态，本站不进样例承诺）。
+
+## 迁移检查
+
+- [ ] grep 代码库的 `Task { … cleanup … }` 伪模式：改 shield 后更安全且无额外调度；
+- [ ] 关键 cleanup 与 F31 组合（`defer { await withTaskCancellationShield { ... } }` —— Swift 6.4 官方推荐组合）。
+
+## 官方证据
+
+- SE-0504：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0504-task-cancellation-shields.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0504-task-cancellation-shields.md)
+- Swift 6.4 发布说明：[https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code](https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code)

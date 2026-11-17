@@ -1,0 +1,20 @@
+# sample: f02-before-run
+# feature: F02 (Typed throws)
+# kind: before | mode: run-swift | toolchain: swift-6.2
+# started: 2026-11-17T13:23:16.984Z finished: 2026-11-17T13:23:17.129Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f02/before.swift sha256=b6236f949986c0acc6172e37695670f553778adb6985ca01296e896ad5da356d
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f02/before.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+caught any Error: offline
+exhaustive switch over any Error 不可行，只能 default
+
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

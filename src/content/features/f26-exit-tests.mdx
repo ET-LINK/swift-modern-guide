@@ -1,0 +1,55 @@
+---
+id: F26
+title: Swift Testing exit tests
+introduced: '6.2'
+versions: ['6.2']
+themes: ['testing-tooling']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: ST-0008 Exit tests
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0008-exit-tests.md
+sampleIds:
+  - f26-exit-tests-run
+summary: 让 precondition/fatalError 这些「进程级失败」变成可测对象：断言一个子进程如何退出。
+---
+
+import tests from '../../../examples/f26/pkg/Tests/ExitTests/ExitTests.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+`func eat(_ taco: consuming Taco) { precondition(taco.isDelicious, ...) }` 想测**失败路径**？
+直接调用会杀死整个测试进程——XCTest 时代这类「必然崩溃的 API」根本没有测试手段，
+代码覆盖率里 precondition 分支永远是暗的。大家只能注释掉断言、或者干脆测不了。
+
+## 为什么变
+
+ST-0008（投入 Swift 6.2 工具链）给 `#expect` / `#require` 加了 `processExitsWith` 形态：
+**闭包被送进子进程执行**，父进程等待并核对其退出状态（`.success` / `.failure` / `.exitCode(n)` / `.signal(sig)`）。
+可观测 stdout/stderr（`observing: [\.standardOutputContent]`）。macOS/Linux/BSD/Windows 都有实现。
+
+## 新写法
+
+<SwiftCode code={tests} caption="ExitTests.swift · precondition 失败与未捕获 throw 都按进程失败断言（真实运行见验证区）" />
+
+## 诊断与「是否仍合法」
+
+- 这是纯增量能力：旧测试不迁移不受影响；
+- **本条不设 broken 样本**的原因也如实说明：exit test 的边界（闭包不能捕获外部状态）以编译错误的形态回报——
+  诊断措辞是 C 函数指针转换失败类的报错，把它当「负例特性」反而误导。条件约束文档化即可。
+
+## 常见坑
+
+- exit test 的闭包运行在**子进程**，拿不到外层变量（含参数化测试的参数）；
+- 断言是平台相关的：signal 只在 POSIX 系上有；对照 ST-0008 的 `SWT_NO_EXIT_TESTS` 平台列表；
+- 子进程无隔离的 stdout/stderr buffer，巨大输出需要 `'observing'` 显式 opt-in。
+
+## 迁移检查
+
+- [ ] 搜出 codebase 里的 precondition/fatalError 单测盲区，逐个补 exit test；
+- [ ] CI 的覆盖率豁免规则同步修订（这批分支不再该豁免）。
+
+## 官方证据
+
+- ST-0008：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0008-exit-tests.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0008-exit-tests.md)

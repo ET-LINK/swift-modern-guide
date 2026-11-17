@@ -1,0 +1,18 @@
+# sample: f30-emit-module-a
+# feature: F30 (Module selectors（Module::api）)
+# kind: prep | mode: emit-module | toolchain: swift-6.3.3
+# started: 2026-11-17T13:23:47.175Z finished: 2026-11-17T13:23:47.295Z
+# swift --version: Swift version 6.3.3 (swift-6.3.3-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f30/ModuleA.swift sha256=2b4931394ad2ace7edce2cde1f3a0991be06d22576a2dd30def78d12b5f4ca64
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.3.3/usr/bin/swiftc -typecheck -module-name ModuleA -emit-module -o /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/build/ModuleA.swiftmodule /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f30/ModuleA.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

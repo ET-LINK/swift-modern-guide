@@ -1,0 +1,23 @@
+# sample: f08-build-run
+# feature: F08 (C++ 互操作：move-only、virtual methods、default arguments)
+# kind: after | mode: package-build-run | toolchain: swift-6.2
+# started: 2026-11-17T13:23:20.868Z finished: 2026-11-17T13:23:21.460Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift run F08Runner
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f08/pkg | exit: 0
+--- stdout ---
+token moved, value=42
+virtual dispatch: area of r=7 circle = 154
+cpp default arg: 12
+
+--- stderr ---
+Building for debugging...
+[0/2] Write swift-version--7C7DF2BDD5441AFA.txt
+Build of product 'F08Runner' complete! (0.10s)
+
+--- end ---
+exit: 0
+result: PASS

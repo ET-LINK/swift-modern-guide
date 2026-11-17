@@ -1,0 +1,85 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const features = (await getCollection('features')).sort((a, b) => a.data.id.localeCompare(b.data.id));
+
+const releases = [
+  { version: '5.9', date: '2023-09', note: '~Copyable 等所有权特性在此首发（F03 标记为 5.9 基础）' },
+  { version: '6.0', date: '2024-09', note: 'Swift 6 language mode、typed throws、data-race safety' },
+  { version: '6.1', date: '2025-03', note: 'nonisolated 扩展、package traits、TestScoping' },
+  { version: '6.2', date: '2025-09', note: 'approachable concurrency、InlineArray、Span、named tasks' },
+  { version: '6.3', date: '2026-03', note: '@c 函数与枚举、module selectors' },
+  { version: '6.4', date: '2026-09', note: 'defer 内 async、cancellation shield、optional some/any 语法' },
+];
+const versionOrder = ['5.9', '6.0', '6.1', '6.2', '6.3', '6.4'];
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+---
+<Base title="Swift 6.x 现代语言特性学习站">
+  <h1>Swift 6.x 现代语言特性</h1>
+  <p>
+    面向「会写 Swift、但没系统跟进 6.x」的 iOS 开发者。每条特性都回答一个问题：
+    <strong>这段代码昨天还能编，今天为什么不能？或者反过来——今天终于能编了。</strong>
+    共 {features.length} 条特性，全部示例经本机多套工具链（6.2 / 6.3.3 / 6.4.2）真实编译验证。
+  </p>
+
+  <div class="filter-bar" role="group" aria-label="按版本筛选">
+    <button data-version="all" aria-pressed="true">全部版本</button>
+    {versionOrder.map((v) => <button data-version={v} aria-pressed="false">{v}</button>)}
+    <span class="filter-count">{features.length} 个特性</span>
+  </div>
+
+  <div class="timeline">
+    {releases.map((rel) => (
+      <div class="timeline-seg" data-version-seg={rel.version}>
+        <div class="timeline-head">
+          <h2>Swift {rel.version}</h2>
+          <span class="tl-date">{rel.date}</span>
+          <span class="tl-date">{rel.note}</span>
+        </div>
+        <div class="feature-grid">
+          {features
+            .filter((f) => f.data.introduced === rel.version)
+            .map((f) => (
+              <a class="feature-card" href={`${base}features/${f.id}/`} data-versions={f.data.versions.join(',')}>
+                <div class="fc-top">
+                  <span class="fc-id">{f.data.id}</span>
+                  <span class="badge ver">{f.data.introduced} 首发</span>
+                  {f.data.expandedIn && <span class="badge">扩展于 {f.data.expandedIn}</span>}
+                  <span class={`badge cat-${f.data.category}`}>{f.data.category} 类验证</span>
+                </div>
+                <p class="fc-title">{f.data.title}</p>
+                <p class="fc-summary">{f.data.summary}</p>
+              </a>
+            ))}
+          {features.filter((f) => f.data.introduced === rel.version).length === 0 && (
+            <p style="color:var(--fg-faint);font-size:13.5px">本版本无独立首发特性（见时间线说明）。</p>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <h2>按主题浏览</h2>
+  <ul>
+    <li><a href={`${base}themes/concurrency/`}>并发（concurrency）</a>：Swift 6 mode、region/sending、Mutex、任务命名、取消屏蔽……</li>
+    <li><a href={`${base}themes/type-system/`}>类型系统（type-system）</a>：typed throws、trailing comma、raw identifiers、optional some/any……</li>
+    <li><a href={`${base}themes/memory-ownership/`}>内存与所有权（memory-ownership）</a>：~Copyable、InlineArray、Span、strict memory safety……</li>
+    <li><a href={`${base}themes/interop/`}>互操作（interop）</a>：C++ / C / iOS 之外的边界。</li>
+    <li><a href={`${base}themes/testing-tooling/`}>测试与工具链（testing-tooling）</a>：Swift Testing、SwiftPM traits、DocC、swift-format……</li>
+  </ul>
+
+  <div class="callout">
+    <p>
+      站点按「
+      <a href={`${base}migration/`}>从 5.9 迁到 6.x 的实操顺序</a>
+      」提供迁移指南；每篇特性页底部附「本机验证」区块，可一键打开原始编译日志。
+    </p>
+  </div>
+  <noscript>
+    <div class="callout warn">
+      <p>当前未启用 JavaScript：正文、导航、全部验证内容仍然可读；搜索、复制按钮、版本筛选为渐进增强功能。</p>
+    </div>
+  </noscript>
+</Base>

@@ -1,0 +1,24 @@
+# sample: f02-broken-typecheck
+# feature: F02 (Typed throws)
+# kind: broken | mode: typecheck6 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:17.540Z finished: 2026-11-17T13:23:17.630Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f02/broken.swift sha256=6a15bc7d61f6098195c701ae6b70b71b4c20883f980652ac5b2c51a331047a9c
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "invalid conversion of thrown error type")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f02/broken.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f02/broken.swift:12:10: error: invalid conversion of thrown error type 'any Error' to 'AuthError'
+10 | // 参数要求抛 AuthError，而 parse() 抛的是 ParseError：
+11 | // error: invalid conversion of thrown error type 'any Error' to 'AuthError'
+12 | register { try parse() }
+   |          `- error: invalid conversion of thrown error type 'any Error' to 'AuthError'
+13 | 
+
+--- end ---
+exit: 1
+result: PASS

@@ -1,0 +1,60 @@
+---
+id: F22
+title: Opt-in strict memory safety（-strict-memory-safety）
+introduced: '6.2'
+versions: ['6.2']
+themes: ['memory-ownership']
+category: A
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0458 Strict memory safety
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0458-strict-memory-safety.md
+sampleIds:
+  - f22-after-safe-typecheck
+  - f22-warn-groups
+  - f22-broken-werror
+summary: 把 unsafe API 的使用变成可整体治理的选项：flag 开启后一类类内存安全诊断逐步进入默认集。
+---
+
+import after from '../../../examples/f22/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+`let p = UnsafeMutablePointer(&array)` 这种悬垂指针，Swift 编译器**一直有**警告（`TemporaryPointers` 诊断组），
+但警告不疼不痒：CI 上一片黄，没人当回事。想「把所有内存安全告警当 error」？粒度太粗，误伤无辜告警。
+
+## 为什么变
+
+SE-0458 建立一个**演进式的 opt-in 开关**：`-strict-memory-safety`。
+开启后，编译器把一类类 unsafe 模式（隐式指针转换、悬垂指针、未定义行为模式）纳入这个总开关治理，
+随版本演进逐步**默认化**。官方目标是「unsafe API 用起来一定被看见」，乃至长期全默认。
+
+## 旧写法 → 新写法（三段式验证，本站实测如实记录）
+
+<SwiftCode code={after} caption="after.swift · flag 开启下按安全姿势书写：作用域化 unsafe + 只读 span，typecheck 干净通过" />
+
+本站的三个样本讲清了这个开关的实际意义：
+
+1. **f22-warn-groups**：不开 flag、更不开 error 时，悬垂指针只是 *warning*（退出码 0）——诊断组标签 `[#TemporaryPointers]`；
+2. **f22-broken-werror**：开 `-strict-memory-safety -Werror TemporaryPointers`，同一份代码**编译失败**——CI 有了可以上墙的硬门（F25 的组级告警控制正好是配套工具）；
+3. **f22-after-safe-typecheck**：按安全写法改写后，flag 开启也静默通过。
+
+诚实注记：样例代码的悬垂指针诊断在 6.2 上早已存在（非本次 flag 新增），
+`-strict-memory-safety` 的理论意义是给这一族诊断提供**可整体启用并逐步默认化**的通道；
+单条护栏的具体落地与新诊断为每个 Swift 版本演化。这是主张，不是 demo 效果。
+
+## 常见坑
+
+- `-strict-memory-safety` 是**模块级**编译器 flag，配合 SwiftPM 的 `-Xswiftc` 或 build settings 使用；
+- 开启后旧代码可能井喷告警——先在测试模块试点，看清族谱再推广；
+- unsafe API 不会一夜消失：目标是被**看见**与**收敛**。
+
+## 迁移检查
+
+- [ ] 新模块直接开 flag + `-Werror <组名>`；
+- [ ] unsafe 使用点的存量清单化：来自 F21 的 Span 与 withSpan 替代方案进 migration backlog。
+
+## 官方证据
+
+- SE-0458：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0458-strict-memory-safety.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0458-strict-memory-safety.md)

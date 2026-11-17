@@ -1,0 +1,72 @@
+---
+id: F25
+title: Diagnostic-group 告警控制
+introduced: '6.1'
+versions: ['6.1', '6.2']
+themes: ['testing-tooling']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0443 Warning control flags
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0443-warning-control-flags.md
+  - label: SE-0480 SwiftPM warning control
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0480-swiftpm-warning-control.md
+sampleIds:
+  - f25-warnings-as-errors-overkill
+  - f25-print-groups
+  - f25-werror-group
+  - f25-swiftpm-treat-warning
+summary: 编译器按诊断组控制告警（6.1 flag），SwiftPM manifest 也接上了（6.2 API）——告别一刀切的 warnings-as-errors。
+---
+
+import warn from '../../../examples/f25/warning.swift?raw';
+import pkg from '../../../examples/f25/pkg/Package.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+想让「deprecated 调用」过不了 CI：`-warnings-as-errors` 一开，**所有**告警全部堵死——
+包括 `_ = someVoidFunc()` 这种最低害度的（`#RedundantVoid` 级别提示）。
+一刀切导致团队要么全面压制告警，要么干脆放弃这个开关。想要「只把某一组升格成 error」？
+编译器没有「组」的概念——你得靠注释或脚本人肉数。
+
+## 为什么变
+
+两个提案打配合：
+
+- **SE-0443（6.1 起）**：`-print-diagnostic-groups` 打开组标签（比如告警末尾的 `[#DeprecatedDeclaration]`）；
+  `-Werror <Group>` / `-Wwarning <Group>` 按**组**升降级。
+- **SE-0480（6.2 起）**：SwiftPM manifest 接上同等能力：
+  `.treatWarning("DeprecatedDeclaration", as: .error)`、`.treatAllWarnings(as: .error)`（含 C/C++ 家族变体）。
+
+## 新写法
+
+<SwiftCode code={warn} caption="warning.swift · 一份触发两组告警的源码（deprecated + 冗余 `_`）" />
+
+<SwiftCode code={pkg} lang="swift" caption="Package.swift · manifest 级组控（本机构建真实失败于 'stale()' is deprecated）" />
+
+## 诊断与「是否仍合法」
+
+本站四组真实样本（见验证区）把这个特性讲透：
+
+1. **before（-warnings-as-errors）**：错的不是 intent，无辜的冗余 `_` 告警同样导致失败——粒度之殇；
+2. `-print-diagnostic-groups`：日志中出现 `[#DeprecatedDeclaration]` 标签——**先看见组名，再谈控制**；
+3. `-Werror DeprecatedDeclaration`：只有目标组的告警升 error，另一条安然为 warning；
+4. SwiftPM manifest API：构建真实失败在指定组上（exit≠0 + 指定诊断）。
+
+## 常见坑
+
+- 组名以 `-print-diagnostic-groups` 的输出为准确准绳——猜组名（比如以为某个叫 `StrictMemorySafety`）会被静默无视；
+- 依赖包的告警不应随上游 seal：SE-0480 规定 remote targets 的 warning 控制会被剥离（只用于你自己的代码）；
+- flag 顺序同族内后写覆盖先写（官方建议显式从具体到一般）。
+
+## 迁移检查
+
+- [ ] `-print-diagnostic-groups` 过一遍构建日志，给噪音分类组名；
+- [ ] 把「真要堵」的组写进 manifest 的 `.treatWarning(as: .error)`；
+- [ ] CI 撤掉一刀切 `-warnings-as-errors`。
+
+## 官方证据
+
+- SE-0443：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0443-warning-control-flags.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0443-warning-control-flags.md)
+- SE-0480：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0480-swiftpm-warning-control.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0480-swiftpm-warning-control.md)

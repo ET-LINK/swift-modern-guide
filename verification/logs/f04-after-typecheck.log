@@ -1,0 +1,18 @@
+# sample: f04-after-typecheck
+# feature: F04 (Noncopyable generics)
+# kind: after | mode: typecheck | toolchain: swift-6.2
+# started: 2026-11-17T13:23:18.511Z finished: 2026-11-17T13:23:18.588Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f04/after.swift sha256=53a679ee719b127ca48aeaeea0609e9c0878698ce0aaf622d8851797de960ec7
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f04/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

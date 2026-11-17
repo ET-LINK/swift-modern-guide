@@ -1,0 +1,18 @@
+# sample: f24-after-typecheck
+# feature: F24 (Named tasks（任务命名）)
+# kind: after | mode: typecheck6 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:43.657Z finished: 2026-11-17T13:23:43.736Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f24/after.swift sha256=0bf80c6fe65822f20ad36ca53b129f1bd897fa90bb3cd24cc0bdb853ed72a4aa
+# expectations:
+#   expect: pass
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f24/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 0
+--- stdout ---
+(空)
+--- stderr ---
+(空)
+--- end ---
+exit: 0
+result: PASS

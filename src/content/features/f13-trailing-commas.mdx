@@ -1,0 +1,53 @@
+---
+id: F13
+title: 更多位置的 trailing comma
+introduced: '6.1'
+versions: ['5.9', '6.1']
+themes: ['type-system']
+category: A
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0439 Allow trailing commas
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0439-trailing-comma-lists.md
+sampleIds:
+  - f13-after-typecheck
+summary: 集合字面量早就有的省心语法扩到元组、形参/实参、泛型列表——diff 友好、代码生成器简化。
+---
+
+import after from '../../../examples/f13/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+数组字面量从 5.9 起可以尾随逗号（`[1, 2, 3,]`），swap 一行、删一行都不用修上一行。
+但函数参数、泛型列表、元组**不行**——于是格式化工具对每一类列表单独写规则，代码生成器对「最后一个元素」特判。
+更早的 SE-0275 尝试过一次全面放开但被退回（理由是实用性论证不足）；SE-0439 这次带着 codegen 生态视角卷土重来并获接受。
+
+## 为什么变
+
+SE-0439 把尾随逗号扩展到：元组、函数参数列表、调用实参、泛型参数列表、闭包捕获列表、字符串插值内的调用。
+动机之一就是 codegen：拼逗号列表不用再特判最后一项。
+
+## 新写法
+
+<SwiftCode code={after} caption="after.swift · 各位置的尾随逗号（typecheck 验证）" />
+
+## 诊断与「是否仍合法」
+
+诚实声明边界：SE-0439 **不是**「所有列表」。本站实测 6.2 工具链：
+函数**类型**的参数列表 `(Int, Int,) -> Void` 与元组**类型**标注仍不接受（after.swift 的注释里点名了）。
+这两种位置想加尾逗号，报的就是「expected ',' separator」级别的解析错误——所以本条不设 broken 样本，
+留给 after.swift 的注释当反面教材。
+
+## 常见坑
+
+- swift-format 的规则与团队的格式约定保持一致：尾逗号之争本质是 codestyle，语言只负责「允许」。
+
+## 迁移检查
+
+- [ ] 代码生成器删掉「最后一项特判」；
+- [ ] 团队 codestyle 明确「允许但非强制」，防止变动风暴混进 git blame。
+
+## 官方证据
+
+- SE-0439：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0439-trailing-comma-lists.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0439-trailing-comma-lists.md)

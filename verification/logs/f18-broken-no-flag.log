@@ -1,0 +1,31 @@
+# sample: f18-broken-no-flag
+# feature: F18 (Default MainActor isolation（-default-isolation）)
+# kind: broken | mode: typecheck6 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:40.781Z finished: 2026-11-17T13:23:40.868Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f18/after.swift sha256=c47e02314f2a9b6b2d11caef249865122c690570aeaf2f0f8c78d763c25e666f
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "main actor-isolated var 'count'")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f18/after.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f18/after.swift:10:5: error: main actor-isolated var 'count' can not be mutated from a nonisolated context
+ 4 | // 注意边界：-default-isolation 是编译器 flag；Xcode 26 的“新 App 默认 MainActor”
+ 5 | // 是模板为 App target 写入同一构建设置，两者并不等同“6.2 的所有模块”。
+ 6 | var count = 0
+   |     `- note: mutation of this var is only permitted within the actor
+ 7 | 
+ 8 | class ViewModel {
+ 9 |   func increment() {
+   |        `- note: add '@MainActor' to make instance method 'increment()' part of global actor 'MainActor'
+10 |     count += 1        // 没有 flag 时：main actor-isolated var 不能在 nonisolated 上下文改
+   |     `- error: main actor-isolated var 'count' can not be mutated from a nonisolated context
+11 |   }
+12 | }
+
+--- end ---
+exit: 1
+result: PASS

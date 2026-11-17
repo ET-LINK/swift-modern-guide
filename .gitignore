@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.toolchains/
+.astro/
+test-results/
+playwright-report/
+playwright/.cache/
+.DS_Store
+*.tmp
+# SwiftPM / 运行器产物（验证证据在 verification/logs，不以二进制进 git）
+.build/
+examples/f29/f29_generated.h
+examples/f30/build/

@@ -1,0 +1,32 @@
+# sample: f07-broken-sharedvar-swift6
+# feature: F07 (Mutex 与 Synchronization)
+# kind: broken | mode: typecheck6 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:20.270Z finished: 2026-11-17T13:23:20.360Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f07/before.swift sha256=76b882d00901888cd5c3d551d8711d0a256f9b88f2b4b34c8158c5998f27613a
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "mutation of captured var")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f07/before.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f07/before.swift:10:23: error: main actor-isolated var 'hits' can not be mutated from a nonisolated context
+ 3 | // 同一文件在 Swift 6 mode 下会得到：
+ 4 | //   error: mutation of captured var 'hits' in concurrently-executing code
+ 5 | var hits = 0
+   |     `- note: mutation of this var is only permitted within the actor
+ 6 | 
+ 7 | func countVisitsLegacy(n: Int) async {
+ 8 |   await withTaskGroup(of: Void.self) { group in
+ 9 |     for _ in 0..<n {
+10 |       group.addTask { hits += 1 }   // 昨天没人在意的竞态
+   |                       |- error: main actor-isolated var 'hits' can not be mutated from a nonisolated context
+   |                       `- note: consider declaring an isolated method on 'MainActor' to perform the mutation
+11 |     }
+12 |   }
+
+--- end ---
+exit: 1
+result: PASS

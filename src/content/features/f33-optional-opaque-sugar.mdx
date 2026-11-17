@@ -1,0 +1,65 @@
+---
+id: F33
+title: Optional `some` / `any` 语法糖
+introduced: '6.4'
+versions: ['6.4']
+themes: ['type-system']
+category: A
+toolchain: 'swift-6.4.2'
+officialSources:
+  - label: SE-0521 Improved optional opaque and any
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0521-improved-optional-opaque-and-any.md
+  - label: Swift 6.4 发布说明
+    url: https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code
+sampleIds:
+  - f33-after-typecheck
+  - f33-broken-composition
+  - f33-broken-on-62
+summary: "'(some Rocket)? → some Rocket?——可选包装不再强制加括号；组合与可选并存时括号仍然必写。'"
+
+---
+import after from '../../../examples/f33/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+`(some Rocket)?`——这层括号是 6.3 及以前的强制要求，不写的话解析歧义
+（`some Rocket?` 会被读成 `some (Rocket?)`，把 optional 当成了协议组合的一部分）。
+于是 heterogeneous 返回、可空 opaque 参数……全都要多打一对眼睛容易漏掉的括号。
+
+## 为什么变
+
+SE-0521（Swift 6.4）让「单个约束 + optional」不再需要括号：
+`some Rocket?` / `any Rocket?`。解析树里 optional 作用于 opaque/existential 整体。
+**但组合（composition）与 optional 并存仍然歧义**，那一对括号 6.4 里还是自己的（见 broken 样本）。
+
+## 新写法
+
+<SwiftCode code={after} caption="after.swift · 参数位置与存储属性位置的免括号写法" />
+
+## 诊断与「是否仍合法」
+
+三个样本把边界钉死：
+
+1. **f33-after（6.4.2 typecheck 通过）**——`some Traced?`、`any Traced?` DIRECT 写法成立；
+2. **f33-broken-composition**——`some Traced & Sendable?` 拒绝：`confusing use of optional after a 'some' or 'any' composition; use parentheses to clarify precedence`，
+   官方指路要你写 `(some Traced & Sendable)?`；
+3. **f33-broken-on-62**——同一份 after.swift 在 6.2 下：`type 'some Traced?' constrained to non-protocol, non-class type '(any Traced)?'`，
+   语法还没有的时代诊断长这样——**版本边界的真证**。
+
+## 常见坑
+
+- 反直觉：**不一定**意味着一切 `(some X)?` 都该改写——代码生成/惯例一致性优先；
+  新写法可用，旧写法永远合法；
+- opaque 返回类型 + `return nil` 分支的组合在两个版本都推不出 underlying type（6.2/6.4 实测一致：
+  `underlying type for opaque result type could not be inferred`）——可选 opaque 的 nil 分支仍要显式类型助力，与本次提案无关、如实标注。
+
+## 迁移检查
+
+- [ ] 团队 codestyle 决定是否统一免括号形式（无兼容性风险，纯口味）；
+- [ ] 组合 + 可选的一律加括号，别拖给未来的 Swift 版本。
+
+## 官方证据
+
+- SE-0521：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0521-improved-optional-opaque-and-any.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0521-improved-optional-opaque-and-any.md)
+- Swift 6.4 发布说明：[https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code](https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code)

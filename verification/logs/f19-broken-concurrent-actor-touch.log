@@ -1,0 +1,25 @@
+# sample: f19-broken-concurrent-actor-touch
+# feature: F19 (Caller-isolated async 与 @concurrent)
+# kind: broken | mode: typecheck6 | toolchain: swift-6.2
+# started: 2026-11-17T13:23:41.203Z finished: 2026-11-17T13:23:41.280Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f19/broken.swift sha256=7d4a78c8bdf57c4952697190eba86d4466fca05305adb4f480d41489164cadd3
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "cannot be called from outside of the actor")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f19/broken.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f19/broken.swift:11:5: error: main actor-isolated global function 'refreshList()' cannot be called from outside of the actor
+ 9 |   @concurrent
+10 |   func badTouch() async {
+11 |     refreshList()   // ← @concurrent 不是魔法通行证
+   |     `- error: main actor-isolated global function 'refreshList()' cannot be called from outside of the actor
+12 |   }
+13 | }
+
+--- end ---
+exit: 1
+result: PASS

@@ -1,0 +1,57 @@
+---
+id: F27
+title: Swift Testing attachments
+introduced: '6.2'
+versions: ['6.2']
+themes: ['testing-tooling']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: ST-0009 Attachments
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0009-attachments.md
+sampleIds:
+  - f27-attachments-run
+summary: 测试的带外数据：Attachment.record 把诊断资料挂进测试结果，--attachments-path 落盘可查。
+---
+
+import tests from '../../../examples/f27/pkg/Tests/AttachmentTests/AttachmentTests.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+测试失败后想看「当时的状态快照 / 中间数据」？唯一通道是 `print()`——
+混在测试日志的洪流里，翻两屏就没了。XCTest 的 XCTAttachment 只在 Apple 平台存在，
+跨平台团队连「带外数据」这个概念都没有。
+
+## 为什么变
+
+ST-0009（Swift 6.2）引入 `Attachment`：类型化、结构化地把字节挂到测试运行结果。
+默认可附加标准库类型（String、`[UInt8]`…），import Foundation 与 Testing 时还能附加 Encodable/Data/URL。
+CLI 跑法 `--attachments-path <dir>` 把附件真正落盘；工具链（Xcode/VS Code）按事件流展示。
+
+## 新写法（新旧同样本对比）
+
+<SwiftCode code={tests} caption="AttachmentTests.swift · print() 老办法与 Attachment.record 并列在一个包里（真实运行）" />
+
+验证区证据链完整：stdout 显示 `⎙ Attached 'note.txt' to attachAndVerify().`、
+`↳ Written to '<TMP>/note.txt'.`，且运行器直接断言落盘文件内容非空（attachmentAssert）。
+
+## 诊断与「是否仍合法」
+
+- print() 完全合法——对应关系是「混流的自由文本」对「结构化带外数据」，不存在需要负例的失败形态；
+- 附件**只能挂一次**（one attachment per value）——重复挂同一个会按 issue 记录，这是运行期约束。
+
+## 常见坑
+
+- `Attachment.record("...", named: "note.txt")` 的文件名是**优先名**；工具可能改名；
+- 大附件由 estimatedAttachmentByteCount 影响内存/落盘策略，别一股脑 base64 进字符串；
+- CI 落盘目录要挂成 artifact 才事后可见（本站验证器把它放临时目录并在日志记录）。
+
+## 迁移检查
+
+- [ ] 测试中的 debug print 分类：诊断性内容 → Attachment；
+- [ ] CI 的 junit/json 报告外，加 `--attachments-path` 的 artifact 上传。
+
+## 官方证据
+
+- ST-0009：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0009-attachments.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0009-attachments.md)

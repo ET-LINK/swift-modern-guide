@@ -1,0 +1,69 @@
+name: Deploy to GitHub Pages
+
+# 本仓库的发布流水线：验证 → 构建 → 站点测试 → 资源预算 → 生成 PR 产物 → 部署 Pages。
+# 说明：构建机由 GitHub 提供（ubuntu-latest），工具链通过 scripts/fetch-toolchains.sh 落盘，
+# 任何一步失败整个发布即失败（fail-fast）。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: 安装三套 Swift 工具链（6.2 / 6.3.3 / 6.4.2）
+        run: bash scripts/fetch-toolchains.sh
+      - name: 示例验证（全部样本，负例需带诊断失败）
+        run: npm run verify:samples
+      - name: 内容一致性检查
+        run: npm run check:content
+
+  build:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: 构建（含验证日志快照）
+        run: npm run build
+      - name: 链接检查
+        run: npm run check:links
+      - name: 资源预算检查（单页 ≤ 1.5MB）
+        run: npm run check:budget
+      - name: 安装 Playwright 浏览器
+        run: npx playwright install --with-deps chromium
+      - name: 浏览器自测（含 390px、深色、搜索、复制、无外部请求）
+        run: npm run test:e2e
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

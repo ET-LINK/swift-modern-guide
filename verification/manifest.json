@@ -1,0 +1,1772 @@
+{
+  "version": 1,
+  "verifiedAt": "2026-11-17",
+  "pilotFeatures": [
+    "F01",
+    "F02",
+    "F03",
+    "F05",
+    "F07",
+    "F10",
+    "F20",
+    "F21",
+    "F29",
+    "F31"
+  ],
+  "toolchains": [
+    {
+      "id": "swift-6.2",
+      "dir": ".toolchains/swift-6.2",
+      "expectVersion": "Swift 6.2"
+    },
+    {
+      "id": "swift-6.3.3",
+      "dir": ".toolchains/swift-6.3.3",
+      "expectVersion": "Swift 6.3.3"
+    },
+    {
+      "id": "swift-6.4.2",
+      "dir": ".toolchains/swift-6.4.2",
+      "expectVersion": "Swift 6.4.2"
+    }
+  ],
+  "features": [
+    {
+      "id": "F01",
+      "title": "Swift 6 language mode 与 data-race safety",
+      "introduced": "6.0",
+      "category": "B",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "concurrency"
+      ],
+      "officialSources": [
+        {
+          "label": "Swift 6 发布说明 · Concurrency",
+          "url": "https://www.swift.org/blog/announcing-swift-6/#concurrency"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f01-before-swift5",
+          "kind": "before",
+          "mode": "typecheck5",
+          "extraArgs": [
+            "-parse-as-library"
+          ],
+          "files": [
+            {
+              "path": "examples/f01/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "notes": "Swift 5 language mode 下一模一样的顶层可变全局量照常编译，无任何诊断——这正是“昨天还能过”的部分。"
+        },
+        {
+          "id": "f01-after-swift6",
+          "kind": "after",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f01/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f01-broken-swift6",
+          "kind": "broken",
+          "mode": "typecheck6",
+          "extraArgs": [
+            "-parse-as-library"
+          ],
+          "files": [
+            {
+              "path": "examples/f01/before.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "nonisolated global shared mutable state"
+        }
+      ]
+    },
+    {
+      "id": "F02",
+      "title": "Typed throws",
+      "introduced": "6.0",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "type-system"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0413",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0413-typed-throws.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f02-before-run",
+          "kind": "before",
+          "mode": "run-swift",
+          "files": [
+            {
+              "path": "examples/f02/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "caught any Error: offline",
+            "exhaustive switch over any Error 不可行，只能 default"
+          ]
+        },
+        {
+          "id": "f02-after-run",
+          "kind": "after",
+          "mode": "run-swift",
+          "files": [
+            {
+              "path": "examples/f02/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "ok: user-7",
+            "offline",
+            "timeout",
+            "forwarded timeout"
+          ]
+        },
+        {
+          "id": "f02-broken-typecheck",
+          "kind": "broken",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f02/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "invalid conversion of thrown error type"
+        }
+      ]
+    },
+    {
+      "id": "F03",
+      "title": "Noncopyable structs/enums、~Copyable 与所有权",
+      "introduced": "5.9",
+      "expandedIn": "6.0",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "memory-ownership"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0390",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0390-noncopyable-structs-and-enums.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f03-before-run",
+          "kind": "before",
+          "mode": "run-swift",
+          "files": [
+            {
+              "path": "examples/f03/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "open b.txt",
+            "close b.txt (can be called twice: 2)",
+            "close b.txt (second call ok: 3)",
+            "deinit b.txt",
+            "scope ended"
+          ]
+        },
+        {
+          "id": "f03-after-run",
+          "kind": "after",
+          "mode": "run-swift",
+          "files": [
+            {
+              "path": "examples/f03/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "open a.txt",
+            "close a.txt",
+            "deinit a.txt",
+            "scope ended"
+          ]
+        },
+        {
+          "id": "f03-broken-consume",
+          "kind": "broken",
+          "mode": "compile6",
+          "files": [
+            {
+              "path": "examples/f03/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "used after consume"
+        }
+      ]
+    },
+    {
+      "id": "F04",
+      "title": "Noncopyable generics",
+      "introduced": "6.0",
+      "category": "A",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "memory-ownership",
+        "type-system"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0427",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0427-noncopyable-generics.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f04-after-typecheck",
+          "kind": "after",
+          "mode": "typecheck",
+          "files": [
+            {
+              "path": "examples/f04/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        }
+      ]
+    },
+    {
+      "id": "F05",
+      "title": "Region-based isolation",
+      "introduced": "6.0",
+      "category": "B",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "concurrency",
+        "memory-ownership"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0414",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0414-region-based-isolation.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f05-before-workaround",
+          "kind": "before",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f05/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "notes": "SE-0414 之前的通融做法：@unchecked Sendable 包装。现在仍合法，但绕过了检查、把安全责任全压给作者。"
+        },
+        {
+          "id": "f05-after-transfer",
+          "kind": "after",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f05/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f05-broken-alias-after-transfer",
+          "kind": "broken",
+          "mode": "compile6",
+          "files": [
+            {
+              "path": "examples/f05/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "risks causing data races"
+        }
+      ]
+    },
+    {
+      "id": "F06",
+      "title": "sending 参数与结果",
+      "introduced": "6.0",
+      "category": "B",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "concurrency"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0430",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0430-transferring-parameters-and-results.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f06-before-unchecked",
+          "kind": "before",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f06/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "notes": "用 @unchecked Sendable 硬闯隔离边界的旧写法，仍合法。"
+        },
+        {
+          "id": "f06-after-sending",
+          "kind": "after",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f06/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f06-broken-use-after-send",
+          "kind": "broken",
+          "mode": "compile6",
+          "files": [
+            {
+              "path": "examples/f06/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "parameter of noncopyable type 'Peg' must specify ownership",
+          "notes": "6.2 对可复制类型的“发送后再用”本身不做编译期诊断（弱转移模型，正文如实说明）；跨所有权界面的强制点是这里展示的 ownership 显式化。"
+        }
+      ]
+    },
+    {
+      "id": "F07",
+      "title": "Mutex 与 Synchronization",
+      "introduced": "6.0",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "concurrency",
+        "memory-ownership"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0433",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0433-mutex.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f07-before-sharedvar-swift5",
+          "kind": "before",
+          "mode": "typecheck5",
+          "files": [
+            {
+              "path": "examples/f07/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "notes": "Swift 5 模式下共享可变变量+任务组增量静默通过（存在数据竞争隐患，故不运行）。"
+        },
+        {
+          "id": "f07-broken-sharedvar-swift6",
+          "kind": "broken",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f07/before.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "mutation of captured var"
+        },
+        {
+          "id": "f07-after-run",
+          "kind": "after",
+          "mode": "compile-run6",
+          "files": [
+            {
+              "path": "examples/f07/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "count=1000"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F08",
+      "title": "C++ 互操作：move-only、virtual methods、default arguments",
+      "introduced": "5.9",
+      "expandedIn": "6.0",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "interop"
+      ],
+      "officialSources": [
+        {
+          "label": "Swift 6 发布说明 · C++",
+          "url": "https://www.swift.org/blog/announcing-swift-6/#c-interoperability"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f08-build-run",
+          "kind": "after",
+          "mode": "package-build-run",
+          "package": {
+            "dir": "examples/f08/pkg",
+            "executable": "F08Runner",
+            "args": []
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutGolden": [
+            "token moved, value=42",
+            "virtual dispatch: area of r=7 circle = 154",
+            "cpp default arg: 12"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F09",
+      "title": "Embedded Swift（实验性）",
+      "introduced": "6.0",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "interop"
+      ],
+      "officialSources": [
+        {
+          "label": "Swift 6 发布说明 · Embedded",
+          "url": "https://www.swift.org/blog/announcing-swift-6/#embedded-swift"
+        },
+        {
+          "label": "Embedded Swift vision",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/visions/embedded-swift.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f09-after-run",
+          "kind": "after",
+          "mode": "embedded-run",
+          "files": [
+            {
+              "path": "examples/f09/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "embedded total=24",
+            "reading: 21C"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F10",
+      "title": "Swift Testing 入门与迁移",
+      "introduced": "6.0",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "testing-tooling"
+      ],
+      "officialSources": [
+        {
+          "label": "Swift 6 发布说明 · Swift Testing",
+          "url": "https://www.swift.org/blog/announcing-swift-6/#swift-testing"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f10-build-tests",
+          "kind": "after",
+          "mode": "package-build-tests",
+          "package": {
+            "dir": "examples/f10/pkg"
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutSubstrings": [
+            "Build complete"
+          ]
+        },
+        {
+          "id": "f10-testing-only",
+          "kind": "after",
+          "mode": "package-test",
+          "package": {
+            "dir": "examples/f10/pkg",
+            "args": [
+              "--disable-xctest"
+            ]
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutSubstrings": [
+            "Test run with 2 tests",
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F11",
+      "title": "nonisolated 用于类型与 extension（阻断全局主体推断）",
+      "introduced": "6.1",
+      "category": "B",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "concurrency"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0449",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0449-nonisolated-for-global-actor-cutoff.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f11-after-typecheck",
+          "kind": "after",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f11/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f11-broken-crossing",
+          "kind": "broken",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f11/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "in a synchronous nonisolated context"
+        }
+      ]
+    },
+    {
+      "id": "F12",
+      "title": "Task group 子任务结果类型推断",
+      "introduced": "6.1",
+      "category": "B",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "concurrency"
+      ],
+      "officialSources": [
+        {
+          "label": "Swift 6.1 发布说明 · Concurrency",
+          "url": "https://www.swift.org/blog/swift-6.1-released/#concurrency"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f12-before-explicit",
+          "kind": "before",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f12/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "notes": "6.0 及更早必须显式写 of:，现在仍合法。"
+        },
+        {
+          "id": "f12-after-inferred",
+          "kind": "after",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f12/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        }
+      ]
+    },
+    {
+      "id": "F13",
+      "title": "更多位置的 trailing comma",
+      "introduced": "6.1",
+      "category": "A",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "type-system"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0439",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0439-trailing-comma-lists.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f13-after-typecheck",
+          "kind": "after",
+          "mode": "typecheck",
+          "files": [
+            {
+              "path": "examples/f13/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        }
+      ]
+    },
+    {
+      "id": "F14",
+      "title": "SwiftPM package traits",
+      "introduced": "6.1",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "testing-tooling"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0450",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0450-swiftpm-package-traits.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f14-traits-default",
+          "kind": "after",
+          "mode": "package-build-run",
+          "package": {
+            "dir": "examples/f14/pkg",
+            "executable": "F14Runner",
+            "args": [],
+            "scratch": true
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutGolden": [
+            "describe=fast debug=quiet"
+          ]
+        },
+        {
+          "id": "f14-traits-verbose",
+          "kind": "after",
+          "mode": "package-build-run",
+          "package": {
+            "dir": "examples/f14/pkg",
+            "executable": "F14Runner",
+            "args": [
+              "--disable-default-traits",
+              "--traits",
+              "VerboseLogs"
+            ],
+            "scratch": true
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutGolden": [
+            "describe=generic debug=verbose"
+          ]
+        },
+        {
+          "id": "f14-traits-nodefault",
+          "kind": "after",
+          "mode": "package-build-run",
+          "package": {
+            "dir": "examples/f14/pkg",
+            "executable": "F14Runner",
+            "args": [
+              "--disable-default-traits"
+            ],
+            "scratch": true
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutGolden": [
+            "describe=generic debug=quiet"
+          ]
+        },
+        {
+          "id": "f14-traits-all",
+          "kind": "after",
+          "mode": "package-build-run",
+          "package": {
+            "dir": "examples/f14/pkg",
+            "executable": "F14Runner",
+            "args": [
+              "--enable-all-traits"
+            ],
+            "scratch": true
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutGolden": [
+            "describe=fast debug=verbose"
+          ]
+        },
+        {
+          "id": "f14-before-envvar",
+          "kind": "before",
+          "mode": "run-swift",
+          "files": [
+            {
+              "path": "examples/f14/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "traits-style=generic",
+            "traits-style=fast"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F15",
+      "title": "Swift Testing TestScoping（自定义 setup/teardown trait）",
+      "introduced": "6.1",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "testing-tooling"
+      ],
+      "officialSources": [
+        {
+          "label": "ST-0007",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0007-test-scoping-traits.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f15-scoping-run",
+          "kind": "after",
+          "mode": "package-test",
+          "package": {
+            "dir": "examples/f15/pkg",
+            "args": [
+              "--disable-xctest"
+            ]
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutSubstrings": [
+            "before: setup-counter",
+            "after: released",
+            "Test run with"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F16",
+      "title": "DocC 符号链接按参数/返回类型消歧",
+      "introduced": "6.1",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "testing-tooling"
+      ],
+      "officialSources": [
+        {
+          "label": "Swift 6.1 发布说明 · DocC",
+          "url": "https://www.swift.org/blog/swift-6.1-released/#swift-docc"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f16-docc-generate",
+          "kind": "after",
+          "mode": "docc-generate",
+          "package": {
+            "dir": "examples/f16/pkg",
+            "target": "F16Docs"
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutSubstrings": [
+            "'combine(_:)' is ambiguous",
+            "Insert '->Int'",
+            "Insert '->Double'",
+            "Finished building documentation for 'F16Docs'"
+          ],
+          "notes": "同一次生成中：旧式 ``combine(_:)`` 链接产生 ambiguous 警告并给出 Insert '->Int' / '->Double' 建议；新式 ``combine(_:)->Double`` 链接静默解析。"
+        }
+      ]
+    },
+    {
+      "id": "F17",
+      "title": "swift-format 随官方工具链分发",
+      "introduced": "6.0",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "testing-tooling"
+      ],
+      "officialSources": [
+        {
+          "label": "swift-format README · Included in the Swift toolchain",
+          "url": "https://github.com/swiftlang/swift-format/blob/main/README.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f17-format-run",
+          "kind": "after",
+          "mode": "format",
+          "files": [
+            {
+              "path": "examples/f17/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "formatDiff": true,
+          "stdoutSubstrings": [
+            "func bar() -> Int { return x }"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F18",
+      "title": "Default MainActor isolation（-default-isolation）",
+      "introduced": "6.2",
+      "category": "B",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "concurrency"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0466",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md"
+        },
+        {
+          "label": "WWDC25 · Xcode 26 新项目默认 MainActor",
+          "url": "https://developer.apple.com/videos/play/wwdc2025/270/?time=131"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f18-after-default-isolation",
+          "kind": "after",
+          "mode": "typecheck6",
+          "extraArgs": [
+            "-default-isolation",
+            "MainActor"
+          ],
+          "files": [
+            {
+              "path": "examples/f18/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f18-broken-no-flag",
+          "kind": "broken",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f18/after.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "main actor-isolated var 'count'"
+        }
+      ]
+    },
+    {
+      "id": "F19",
+      "title": "Caller-isolated async 与 @concurrent",
+      "introduced": "6.2",
+      "category": "B",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "concurrency"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0461",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0461-async-function-isolation.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f19-after-typecheck",
+          "kind": "after",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f19/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f19-broken-concurrent-actor-touch",
+          "kind": "broken",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f19/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "cannot be called from outside of the actor"
+        }
+      ]
+    },
+    {
+      "id": "F20",
+      "title": "InlineArray 与 [N of T] 语法糖",
+      "introduced": "6.2",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "memory-ownership",
+        "type-system"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0453",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0453-vector.md"
+        },
+        {
+          "label": "SE-0483",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0483-inline-array-sugar.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f20-after-run",
+          "kind": "after",
+          "mode": "run-swift",
+          "files": [
+            {
+              "path": "examples/f20/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "sum=10, count=4",
+            "total=11"
+          ]
+        },
+        {
+          "id": "f20-broken-count-mismatch",
+          "kind": "broken",
+          "mode": "typecheck",
+          "files": [
+            {
+              "path": "examples/f20/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "but got '4'"
+        }
+      ]
+    },
+    {
+      "id": "F21",
+      "title": "Span 与标准库 .span 视图",
+      "introduced": "6.2",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "memory-ownership"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0447",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0447-span-access-shared-contiguous-storage.md"
+        },
+        {
+          "label": "SE-0456",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0456-stdlib-span-properties.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f21-before-unmanaged-pointer",
+          "kind": "before",
+          "mode": "run-swift",
+          "files": [
+            {
+              "path": "examples/f21/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "unsafe sum: 60"
+          ]
+        },
+        {
+          "id": "f21-after-run",
+          "kind": "after",
+          "mode": "run-swift",
+          "files": [
+            {
+              "path": "examples/f21/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "span sum: 60"
+          ]
+        },
+        {
+          "id": "f21-broken-escape",
+          "kind": "broken",
+          "mode": "typecheck",
+          "files": [
+            {
+              "path": "examples/f21/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "~Escapable"
+        }
+      ]
+    },
+    {
+      "id": "F22",
+      "title": "Opt-in strict memory safety（-strict-memory-safety）",
+      "introduced": "6.2",
+      "category": "A",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "memory-ownership"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0458",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0458-strict-memory-safety.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f22-after-safe-typecheck",
+          "kind": "after",
+          "mode": "typecheck",
+          "extraArgs": [
+            "-strict-memory-safety"
+          ],
+          "files": [
+            {
+              "path": "examples/f22/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f22-warn-groups",
+          "kind": "before",
+          "mode": "typecheck",
+          "files": [
+            {
+              "path": "examples/f22/broken.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stderrSubstrings": [
+            "TemporaryPointers"
+          ]
+        },
+        {
+          "id": "f22-broken-werror",
+          "kind": "broken",
+          "mode": "typecheck",
+          "extraArgs": [
+            "-strict-memory-safety",
+            "-Werror",
+            "TemporaryPointers"
+          ],
+          "files": [
+            {
+              "path": "examples/f22/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "dangling pointer"
+        }
+      ]
+    },
+    {
+      "id": "F23",
+      "title": "Escaped identifiers / raw identifiers",
+      "introduced": "6.2",
+      "category": "A",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "type-system"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0451",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0451-escaped-identifiers.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f23-after-typecheck",
+          "kind": "after",
+          "mode": "typecheck",
+          "files": [
+            {
+              "path": "examples/f23/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f23-broken-unescaped",
+          "kind": "broken",
+          "mode": "typecheck",
+          "files": [
+            {
+              "path": "examples/f23/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "expected ',' separator"
+        }
+      ]
+    },
+    {
+      "id": "F24",
+      "title": "Named tasks（任务命名）",
+      "introduced": "6.2",
+      "category": "B",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "concurrency"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0469",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0469-task-names.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f24-after-typecheck",
+          "kind": "after",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f24/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "notes": "只使用 6.2 已实现的创建/读取 API：Task(name:)、Task.detached(name:)、addTask(name:) 与 Task.name。"
+        }
+      ]
+    },
+    {
+      "id": "F25",
+      "title": "Diagnostic-group 告警控制",
+      "introduced": "6.1",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "testing-tooling"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0443",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0443-warning-control-flags.md"
+        },
+        {
+          "label": "SE-0480",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0480-swiftpm-warning-control.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f25-warnings-as-errors-overkill",
+          "kind": "before",
+          "mode": "typecheck",
+          "extraArgs": [
+            "-warnings-as-errors"
+          ],
+          "files": [
+            {
+              "path": "examples/f25/warning.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "redundant",
+          "notes": "一揽子 -warnings-as-errors 连无辜的 '_' 冗余告警也挡下，体现旧开关粒度太粗。"
+        },
+        {
+          "id": "f25-print-groups",
+          "kind": "after",
+          "mode": "typecheck",
+          "extraArgs": [
+            "-print-diagnostic-groups"
+          ],
+          "files": [
+            {
+              "path": "examples/f25/warning.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stderrSubstrings": [
+            "[#DeprecatedDeclaration]"
+          ]
+        },
+        {
+          "id": "f25-werror-group",
+          "kind": "after",
+          "mode": "typecheck",
+          "extraArgs": [
+            "-Werror",
+            "DeprecatedDeclaration"
+          ],
+          "files": [
+            {
+              "path": "examples/f25/warning.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "'oldAPI()' is deprecated"
+        },
+        {
+          "id": "f25-swiftpm-treat-warning",
+          "kind": "after",
+          "mode": "package-build",
+          "package": {
+            "dir": "examples/f25/pkg"
+          },
+          "files": [],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "'stale()' is deprecated"
+        }
+      ]
+    },
+    {
+      "id": "F26",
+      "title": "Swift Testing exit tests",
+      "introduced": "6.2",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "testing-tooling"
+      ],
+      "officialSources": [
+        {
+          "label": "ST-0008",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0008-exit-tests.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f26-exit-tests-run",
+          "kind": "after",
+          "mode": "package-test",
+          "package": {
+            "dir": "examples/f26/pkg",
+            "args": [
+              "--disable-xctest"
+            ]
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutSubstrings": [
+            "Test run with",
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F27",
+      "title": "Swift Testing attachments",
+      "introduced": "6.2",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "testing-tooling"
+      ],
+      "officialSources": [
+        {
+          "label": "ST-0009",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/testing/0009-attachments.md"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f27-attachments-run",
+          "kind": "after",
+          "mode": "package-test-attachments",
+          "package": {
+            "dir": "examples/f27/pkg",
+            "args": [
+              "--disable-xctest"
+            ],
+            "attachmentsName": "f27-attachments"
+          },
+          "files": [],
+          "expect": "pass",
+          "stdoutSubstrings": [
+            "Attached 'note.txt'",
+            "Test run with",
+            "passed"
+          ],
+          "attachmentAssert": {
+            "file": "note.txt",
+            "content": "attachment-content-check"
+          }
+        }
+      ]
+    },
+    {
+      "id": "F28",
+      "title": "swift-format 有效配置查看（--effective）",
+      "introduced": "6.2",
+      "category": "C",
+      "toolchain": "swift-6.2",
+      "themes": [
+        "testing-tooling"
+      ],
+      "officialSources": [
+        {
+          "label": "swift-format 602.0.0 release notes",
+          "url": "https://github.com/swiftlang/swift-format/releases/tag/602.0.0"
+        },
+        {
+          "label": "swift-format 6.2 README · Viewing the effective configuration",
+          "url": "https://github.com/swiftlang/swift-format/blob/release/6.2/README.md#viewing-the-effective-configuration"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f28-dump-effective",
+          "kind": "after",
+          "mode": "format-dump",
+          "files": [],
+          "expect": "pass",
+          "stdoutSubstrings": [
+            "\"version\" :",
+            "\"fileScopedDeclarationPrivacy\""
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F29",
+      "title": "@c 函数与枚举（C 互操作）",
+      "introduced": "6.3",
+      "category": "A",
+      "toolchain": "swift-6.3.3",
+      "themes": [
+        "interop"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0495",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0495-cdecl.md"
+        },
+        {
+          "label": "Swift 6.3 发布说明 · C interoperability",
+          "url": "https://www.swift.org/blog/swift-6.3-released/#c-interoperability"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f29-typecheck-63",
+          "kind": "after",
+          "mode": "typecheck6",
+          "files": [
+            {
+              "path": "examples/f29/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f29-emit-header",
+          "kind": "after",
+          "mode": "emit-clang-header",
+          "files": [
+            {
+              "path": "examples/f29/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "outputPath": "examples/f29/f29_generated.h",
+          "expect": "pass",
+          "artifactSubstrings": [
+            "int addValues(int a, int b)",
+            "LevelLow",
+            "CalculateFacade_multiply"
+          ]
+        },
+        {
+          "id": "f29-broken-on-62",
+          "kind": "broken",
+          "mode": "typecheck6",
+          "toolchainId": "swift-6.2",
+          "files": [
+            {
+              "path": "examples/f29/after.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "unknown attribute 'c'"
+        }
+      ]
+    },
+    {
+      "id": "F30",
+      "title": "Module selectors（Module::api）",
+      "introduced": "6.3",
+      "category": "A",
+      "toolchain": "swift-6.3.3",
+      "themes": [
+        "interop",
+        "type-system"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0491",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0491-module-selectors.md"
+        },
+        {
+          "label": "Swift 6.3 发布说明 · Module name selectors",
+          "url": "https://www.swift.org/blog/swift-6.3-released/#module-name-selectors"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f30-emit-module-a",
+          "kind": "prep",
+          "mode": "emit-module",
+          "moduleName": "ModuleA",
+          "files": [
+            {
+              "path": "examples/f30/ModuleA.swift",
+              "expect": "pass"
+            }
+          ],
+          "outputPath": "examples/f30/build/ModuleA.swiftmodule",
+          "expect": "pass"
+        },
+        {
+          "id": "f30-emit-module-b",
+          "kind": "prep",
+          "mode": "emit-module",
+          "moduleName": "ModuleB",
+          "files": [
+            {
+              "path": "examples/f30/ModuleB.swift",
+              "expect": "pass"
+            }
+          ],
+          "outputPath": "examples/f30/build/ModuleB.swiftmodule",
+          "expect": "pass"
+        },
+        {
+          "id": "f30-client-typecheck",
+          "kind": "after",
+          "mode": "typecheck6",
+          "extraArgs": [
+            "-I",
+            "examples/f30/build"
+          ],
+          "files": [
+            {
+              "path": "examples/f30/client.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f30-broken-on-62",
+          "kind": "broken",
+          "mode": "typecheck6",
+          "toolchainId": "swift-6.2",
+          "extraArgs": [
+            "-I",
+            "examples/f30/build"
+          ],
+          "files": [
+            {
+              "path": "examples/f30/client.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "consecutive statements on a line must be separated by ';'"
+        }
+      ]
+    },
+    {
+      "id": "F31",
+      "title": "defer 块中的 async 调用",
+      "introduced": "6.4",
+      "category": "C",
+      "toolchain": "swift-6.4.2",
+      "themes": [
+        "concurrency"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0493",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0493-defer-async.md"
+        },
+        {
+          "label": "Swift 6.4 发布说明 · Simpler and clearer code",
+          "url": "https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f31-before-manual",
+          "kind": "before",
+          "mode": "run-swift",
+          "files": [
+            {
+              "path": "examples/f31/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "open session 9",
+            "body done",
+            "flush logs for 9",
+            "work-9"
+          ]
+        },
+        {
+          "id": "f31-after-run",
+          "kind": "after",
+          "mode": "run-swift",
+          "files": [
+            {
+              "path": "examples/f31/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "open session 7",
+            "body done",
+            "flush logs for 7",
+            "work-7"
+          ]
+        },
+        {
+          "id": "f31-broken-on-62",
+          "kind": "broken",
+          "mode": "run-swift",
+          "toolchainId": "swift-6.2",
+          "files": [
+            {
+              "path": "examples/f31/after.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "'async' call cannot occur in a defer body"
+        }
+      ]
+    },
+    {
+      "id": "F32",
+      "title": "Task cancellation shield",
+      "introduced": "6.4",
+      "category": "C",
+      "toolchain": "swift-6.4.2",
+      "themes": [
+        "concurrency"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0504",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0504-task-cancellation-shields.md"
+        },
+        {
+          "label": "Swift 6.4 发布说明",
+          "url": "https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f32-before-detached",
+          "kind": "before",
+          "mode": "compile-run6",
+          "files": [
+            {
+              "path": "examples/f32/before.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "cleanup start",
+            "cleanup done",
+            "task cancelled: true"
+          ]
+        },
+        {
+          "id": "f32-after-run",
+          "kind": "after",
+          "mode": "compile-run6",
+          "files": [
+            {
+              "path": "examples/f32/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass",
+          "stdoutGolden": [
+            "work start",
+            "observed cancellation: true",
+            "cleanup: cancelled=false",
+            "main: still fine"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F33",
+      "title": "Optional some / any 语法糖",
+      "introduced": "6.4",
+      "category": "A",
+      "toolchain": "swift-6.4.2",
+      "themes": [
+        "type-system"
+      ],
+      "officialSources": [
+        {
+          "label": "SE-0521",
+          "url": "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0521-improved-optional-opaque-and-any.md"
+        },
+        {
+          "label": "Swift 6.4 发布说明",
+          "url": "https://www.swift.org/blog/swift-6.4-released/#simpler-and-clearer-code"
+        }
+      ],
+      "samples": [
+        {
+          "id": "f33-after-typecheck",
+          "kind": "after",
+          "mode": "typecheck",
+          "files": [
+            {
+              "path": "examples/f33/after.swift",
+              "expect": "pass"
+            }
+          ],
+          "expect": "pass"
+        },
+        {
+          "id": "f33-broken-composition",
+          "kind": "broken",
+          "mode": "typecheck",
+          "files": [
+            {
+              "path": "examples/f33/broken.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "use parentheses to clarify precedence"
+        },
+        {
+          "id": "f33-broken-on-62",
+          "kind": "broken",
+          "mode": "typecheck",
+          "toolchainId": "swift-6.2",
+          "files": [
+            {
+              "path": "examples/f33/after.swift",
+              "expect": "fail-with-diagnostic"
+            }
+          ],
+          "expect": "fail-with-diagnostic",
+          "diagnosticSubstring": "constrained to non-protocol, non-class type"
+        }
+      ]
+    }
+  ]
+}

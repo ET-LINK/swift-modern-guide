@@ -1,0 +1,58 @@
+---
+id: F20
+title: InlineArray 与 [N of T] 语法糖
+introduced: '6.2'
+versions: ['6.2']
+themes: ['memory-ownership', 'type-system']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0453 InlineArray
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0453-vector.md
+  - label: SE-0483 InlineArray sugar
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0483-inline-array-sugar.md
+sampleIds:
+  - f20-after-run
+  - f20-broken-count-mismatch
+summary: 长度进类型的定长数组：两个 SE 拼起来——本体 SE-0453、[N of T] 糖是 SE-0483。
+---
+
+import after from '../../../examples/f20/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+「这组数据永远 88 个 float」——你用 `[Float]` 表达这个意图，编译器不知道，
+`count` 靠 assert 防御。想上 `SIMD16`？长度又不合适。SVG/Vulkan/OTA 这类**定长缓冲**需求之前的答案都是绕：unsafe buffer（无生命周期）或元组（无下标）。
+
+## 为什么变
+
+SE-0453 引入 `InlineArray<N, T>`：**长度是类型的一部分**，栈上连续存储、无 COW、
+无 ARC 开销（元素为 trivial 时），且与其他 stdlib 集合语义一致（含 Sendable 推断）。
+SE-0483 再给糖：`[4 of Int]` 直接写。两个独立提案——**这是把两个 SE 拆开标注、不混淆的本站条目**。
+
+## 新写法
+
+<SwiftCode code={after} caption="after.swift · 糖形式 + 显式泛型形式（本机真实运行：sum=10, total=11）" />
+
+## 诊断与「是否仍合法」
+
+- 长度 participates 类型检查：broken 样本 `[3 of Int] = [1, 2, 3, 4]` 的诊断直达意图：
+  `expected '3' elements in inline array literal, but got '4'`——**你昨天要用运行期 assert 才能抓的错，今天编译期直接拦**。
+- 旧代码当然不迁移也合法：`[T]` 语义没动，InlineArray 是新货架。
+
+## 常见坑
+
+- Apple 平台部署可用性：InlineArray 的标准库支持随 26 系列提供（本站只验证 Ubuntu host 的编译期可用性，见「关于」）；
+- 赋值/传参是**整体复制**（语义与元组一致），热路径上注意大小；
+- 与 SIMD 不互subset：SIMD 提供向量运算，InlineArray 提供定长容器，各选所需。
+
+## 迁移检查
+
+- [ ] 搜出固定 count 的 assert/让代码文档代替类型说话的位置，换 InlineArray；
+- [ ] 网络/图形缓冲的 decode 侧优先受益。
+
+## 官方证据
+
+- SE-0453：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0453-vector.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0453-vector.md)
+- SE-0483：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0483-inline-array-sugar.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0483-inline-array-sugar.md)

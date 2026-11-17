@@ -1,0 +1,65 @@
+---
+id: F07
+title: Mutex 与 Synchronization
+introduced: '6.0'
+versions: ['6.0']
+themes: ['concurrency', 'memory-ownership']
+category: C
+toolchain: swift-6.2
+officialSources:
+  - label: SE-0433 Synchronization Mutex
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0433-mutex.md
+sampleIds:
+  - f07-before-sharedvar-swift5
+  - f07-broken-sharedvar-swift6
+  - f07-after-run
+summary: 官方 stdlib 的互斥原语：值被锁保护、Mutex 自身 Sendable 可跨隔离域；withLock 门闩式访问。
+---
+
+import before from '../../../examples/f07/before.swift?raw';
+import after from '../../../examples/f07/after.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+共享可变状态 + 任务组并发改——Swift 5 模式下这代码「能跑」（大多数时候）。
+偶发的 count 对不上、偶发的状态覆盖，全变成「玄学 bug」。
+开 Swift 6 mode 之后这份数据竞争被直接点名（`mutation of captured var … in concurrently-executing code`），
+但你手里只有 DispatchQueue/手写锁（线程池模型），或干脆全 actor 化（吞吐不济时也一样难受）。
+
+## 为什么变
+
+Swift 6 需要一个**与并发模型配套**的锁：SE-0433 给标准库加入 `Mutex`——
+需要 `import Synchronization`。设计要点：Mutex guardianship 是**值语义**：装进去的 State 由锁保护，
+Mutex 自身 `Sendable`（作为句柄可以随便跨隔离域传），`withLock` 独占执行闭包。
+特别地：`Value: ~Copyable & Sendable`——非复制值也能安全入锁，配合 region 检查形成完整故事。
+
+## 旧写法与新写法
+
+<SwiftCode code={before} caption="before · 共享 var + 任务组（Swift 5 静默通过；本样本刻意只编译不运行——真实输出会暴露竞态）" />
+
+<SwiftCode code={after} caption="after · Mutex 保护计数（本机实测恒定 count=1000）" />
+
+## 诊断与「是否仍合法」
+
+- before 在 Swift 5 模式合法、在 Swift 6 模式被 `mutation of captured var` 拒绝——两个样本都进了日志。
+- Mutex 自身在 6.2 的 constraint 是 `Value: ~Copyable`（已放开 Sendable 收窄的历史设计），
+  但作为**跨执行域保护手段**仍应只用 Sendable/非复制安全值；官方文档的口径以 target 平台 availability 为准。
+- 本特性没有 broken 样本：锁的正确性错误（如重入）是**运行期**问题，编不出「负例诊断」，如实注明而非硬凑。
+
+## 常见坑
+
+- `withLock` 里别再 `await`（闭包是同步的）——需要异步临界区时回到 actor 模型。
+- Mutex 不可重入：同一任务里嵌套 withLock 同一把锁会死锁——还是运行期问题，编译器不拦。
+- 环境注记：解释器（`swift file.swift` 的 JIT 路径）在这个工具链上不支持 Synchronization 的 TLS 重定位，
+  官方姿势是编译后运行——所以 after 样本模式是 compile-run（日志里两步齐全）。
+
+## 迁移检查
+
+- [ ] 盘点历史 NSLock/DispatchQueue 保护块：高吞吐计数/缓存改为 Mutex；
+- [ ] 状态本来就是 actor 剧本的，别倒退成 Mutex；
+- [ ] `import Synchronization` + 检查目标平台 availability。
+
+## 官方证据
+
+- SE-0433：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0433-mutex.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0433-mutex.md)

@@ -1,0 +1,34 @@
+# sample: f25-werror-group
+# feature: F25 (Diagnostic-group 告警控制)
+# kind: after | mode: typecheck | toolchain: swift-6.2
+# started: 2026-11-17T13:23:44.262Z finished: 2026-11-17T13:23:44.342Z
+# swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
+# input: examples/f25/warning.swift sha256=d001d256e037952dc43f09981c001c68138330bbb930b597f681ac29ab40fbb9
+# expectations:
+#   expect: fail-with-diagnostic (diagnosticSubstring: "'oldAPI()' is deprecated")
+# ----
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -typecheck -Werror DeprecatedDeclaration /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f25/warning.swift
+# step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
+--- stdout ---
+(空)
+--- stderr ---
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f25/warning.swift:14:1: warning: using '_' to ignore the result of a Void-returning function is redundant
+12 | }
+13 | 
+14 | _ = caller()   // 产生「using '_' to ignore the result of a Void-returning function is redundant」
+   | `- warning: using '_' to ignore the result of a Void-returning function is redundant
+15 | 
+
+/home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f25/warning.swift:11:3: error: 'oldAPI()' is deprecated: use newAPI() [#DeprecatedDeclaration]
+ 9 | 
+10 | func caller() {
+11 |   oldAPI()
+   |   `- error: 'oldAPI()' is deprecated: use newAPI() [#DeprecatedDeclaration]
+12 | }
+13 | 
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+
+--- end ---
+exit: 1
+result: PASS

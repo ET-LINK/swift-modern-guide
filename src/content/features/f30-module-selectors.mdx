@@ -1,0 +1,71 @@
+---
+id: F30
+title: Module selectors（Module::api）
+introduced: '6.3'
+versions: ['6.3']
+themes: ['interop', 'type-system']
+category: A
+toolchain: 'swift-6.3.3'
+officialSources:
+  - label: SE-0491 Module selectors
+    url: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0491-module-selectors.md
+  - label: Swift 6.3 发布说明 · Module name selectors
+    url: https://www.swift.org/blog/swift-6.3-released/#module-name-selectors
+sampleIds:
+  - f30-emit-module-a
+  - f30-emit-module-b
+  - f30-client-typecheck
+  - f30-broken-on-62
+summary: ModuleA::getValue() —— import 多个同名模块后，一行限定符解决冲突；6.3 首发（6.4 文档再次提及）。
+---
+
+import client from '../../../examples/f30/client.swift?raw';
+import SwiftCode from '../../components/SwiftCode.astro';
+
+## 昨日症状
+
+两个依赖都叫 `getValue()`（或更常见的：都定义了 `Error`、`Client`）。
+Swift 的解法一直是**改名**：`import ModuleA as A`（6.0 的 module aliasing）或干脆给调用点写转 forwarding wrapper。
+名字是别人的，锅是自己背的——谁 import 的时候还要想「我这个项目里叫 A 的类型是谁」。
+
+## 为什么变
+
+SE-0491 的 module selectors：**在表达式位置显式点名来自哪个 module**：
+`ModuleA::getValue()`。模块名是解析期限定符，不产生运行期开销。
+官方还把 `Swift::` 点亮给 stdlib 符号，让「我想用标准库的 Task」类型的选择能讲清楚。
+
+## 新写法
+
+<SwiftCode code={client} caption="client.swift · 双模块重名 API + Swift:: 标准库点名" />
+
+## 验证方式（如实说明）
+
+Module selector 需要**真实的多模块环境**，所以本站的 A 类验证被拆成三步、全部入日志：
+
+1. `swiftc -module-name ModuleA -emit-module ...`（准备模块 A）
+2. 同法准备模块 B
+3. client 以 `-I` 指向两个模块做 -swift-version 6 typecheck。
+
+## 诊断与「是否仍合法」
+
+- 6.2 工具链拒绝该语法（broken 样本）：`consecutive statements on a line must be separated by ';'`——
+  语法级未知，无从谈起；
+- **版本注记（容易错报的地方）**：本特性**首发 6.3**。Swift 6.4 的发布说明再次把它列为亮点，
+  但首版不是 6.4——本站按 6.3 标注并以 6.3.3 工具链验证；
+- 不加 selector 时旧行为照旧：**优先级是隐式可见性规则**，什么时候都合法，只是歧义时才必须点。
+
+## 常见坑
+
+- `::` 在 Swift 里不是命名空间操作符的其他用途——它**只**出现在「模块限定」的位置；
+- selector 的目标是**消除歧义**，不是性能或封装工具——满篇写反而伤可读性；
+- 两模块同名 API 想同时可见仍有别的方法（aliasing import），selector 是那把更小的刀。
+
+## 迁移检查
+
+- [ ] 冲突热点从「别名 import」逐步改为 selector，读代码的人直接看懂来源；
+- [ ] stdlib 与第三方重名（`Swift::Task` 之类）在文档里点名写法。
+
+## 官方证据
+
+- SE-0491：[https://github.com/swiftlang/swift-evolution/blob/main/proposals/0491-module-selectors.md](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0491-module-selectors.md)
+- Swift 6.3 发布说明 · Module name selectors：[https://www.swift.org/blog/swift-6.3-released/#module-name-selectors](https://www.swift.org/blog/swift-6.3-released/#module-name-selectors)
