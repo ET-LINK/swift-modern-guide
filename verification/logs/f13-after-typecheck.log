@@ -1,7 +1,7 @@
 # sample: f13-after-typecheck
 # feature: F13 (更多位置的 trailing comma)
 # kind: after | mode: typecheck | toolchain: swift-6.2
-# started: 2026-11-17T13:46:23.041Z finished: 2026-11-17T13:46:23.117Z
+# started: 2026-11-17T14:00:29.463Z finished: 2026-11-17T14:00:29.553Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f13/after.swift sha256=ddd07c6e78a4868854e4da4a282ebc7622130f13e6eefe9dd65af97d82063646
 # expectations:

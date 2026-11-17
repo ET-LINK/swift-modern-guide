@@ -1,7 +1,7 @@
 # sample: f02-broken-typecheck
 # feature: F02 (Typed throws)
 # kind: broken | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:46:15.777Z finished: 2026-11-17T13:46:15.867Z
+# started: 2026-11-17T14:00:22.772Z finished: 2026-11-17T14:00:22.863Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f02/broken.swift sha256=6a15bc7d61f6098195c701ae6b70b71b4c20883f980652ac5b2c51a331047a9c
 # expectations:

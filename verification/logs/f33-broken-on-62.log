@@ -1,7 +1,7 @@
 # sample: f33-broken-on-62
 # feature: F33 (Optional some / any 语法糖)
 # kind: broken | mode: typecheck | toolchain: swift-6.2
-# started: 2026-11-17T13:46:56.187Z finished: 2026-11-17T13:46:56.298Z
+# started: 2026-11-17T14:00:59.201Z finished: 2026-11-17T14:00:59.303Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f33/after.swift sha256=b3e1b39e797b4f5576252c04a6158d3fe7a0b0f5df6f82f764b372fe0d41cf5f
 # expectations:

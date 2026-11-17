@@ -332,12 +332,17 @@ const isPartial = !!wantedFeatures;
 const resultsPath = path.join(LOG_DIR, 'results.json');
 
 // 全量运行覆盖 results.json；部分运行（--only pilot / --only F01）合并进已有结果：
-// 只替换本次跑到的样本条目，其余保留——不允许 partial run 破坏已提交的验证状态。
+// 样本条目、toolchains、lastFullRunAt（最近一次全量的时间）都保留全量状态——
+// 不允许 partial run 破坏已提交的验证状态（否则 /verification 页会出现「swift-6.3.3（?）」这类降级）。
 const results = [];
+let prevToolchains = {};
+let lastFullRunAt = null;
 if (isPartial && fs.existsSync(resultsPath)) {
   try {
     const prev = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
     results.push(...(prev.results ?? []));
+    prevToolchains = prev.toolchains ?? {};
+    lastFullRunAt = prev.lastFullRunAt ?? (prev.partialRun ? null : prev.finishedAt ?? null);
   } catch {
     /* 旧的 results.json 损坏时按空集处理 */
   }
@@ -369,13 +374,21 @@ for (const feature of targetFeatures) {
 }
 const summary = {
   finishedAt: fmtDate(),
+  // 最近一次全量运行的时间：partial run 不更新此字段；全量运行时与 finishedAt 相同
+  lastFullRunAt: isPartial ? lastFullRunAt : undefined,
   partialRun: isPartial ? (wantedFeatures ?? []) : false,
-  toolchains: Object.fromEntries([...toolchainCache.entries()].map(([k, v]) => [k, { bin: v.bin, version: v.version.split('\n')[0] }])),
+  // toolchains 合并：本次实际解析的工具链覆盖同名项，其余保留 partial 前的记录
+  toolchains: {
+    ...prevToolchains,
+    ...Object.fromEntries([...toolchainCache.entries()].map(([k, v]) => [k, { bin: v.bin, version: v.version.split('\n')[0] }])),
+  },
   samplesRun: results.length,
   passed: results.filter((r) => r.status === 'pass').length,
   failed: results.filter((r) => r.status !== 'pass').map((r) => ({ sampleId: r.sampleId, problems: r.problems })),
   results: results,
 };
+// 全量运行时显式写 lastFullRunAt（避免 undefined 序列化歧义）
+if (!isPartial) summary.lastFullRunAt = summary.finishedAt;
 fs.writeFileSync(path.join(LOG_DIR, 'results.json'), JSON.stringify(summary, null, 2));
 
 const ranRecords = targetFeatures.flatMap((f) => /* 本次真实执行的样本 */ f.samples.map(() => null)).length

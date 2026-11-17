@@ -1,7 +1,7 @@
 # sample: f22-warn-groups
 # feature: F22 (Opt-in strict memory safety（-strict-memory-safety）)
 # kind: before | mode: typecheck | toolchain: swift-6.2
-# started: 2026-11-17T13:46:47.593Z finished: 2026-11-17T13:46:47.676Z
+# started: 2026-11-17T14:00:51.926Z finished: 2026-11-17T14:00:52.003Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f22/broken.swift sha256=c6afea5e3bffd45b45dc3be328f07d9e3b369822c8b3e774181ca90517065f65
 # expectations:

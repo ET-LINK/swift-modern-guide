@@ -1,7 +1,7 @@
 # sample: f24-after-typecheck
 # feature: F24 (Named tasks（任务命名）)
 # kind: after | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:46:48.496Z finished: 2026-11-17T13:46:48.591Z
+# started: 2026-11-17T14:00:52.790Z finished: 2026-11-17T14:00:52.869Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f24/after.swift sha256=0bf80c6fe65822f20ad36ca53b129f1bd897fa90bb3cd24cc0bdb853ed72a4aa
 # expectations:

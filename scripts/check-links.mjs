@@ -36,6 +36,12 @@ for (const hf of htmlFiles) {
       problems.push(`${rel} → ${href}（protocol-relative 站内链接，浏览器会解析为外部主机）`);
       continue;
     }
+    // base 后的连续斜杠（/swift-modern-guide//）依赖服务器 normalize 才能 200，
+    // GitHub Pages 不保证该行为：一律视为断链
+    if (href === `${BASE_PREFIX}//` || href.startsWith(`${BASE_PREFIX}//`)) {
+      problems.push(`${rel} → ${href}（base 前缀后出现连续斜杠）`);
+      continue;
+    }
     if (/^(https?:|data:|mailto:|#)/.test(href)) continue;
     const [clean, hash] = href.split('#');
     if (!clean) continue;

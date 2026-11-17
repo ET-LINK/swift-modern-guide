@@ -1,12 +1,12 @@
 # sample: f14-traits-default
 # feature: F14 (SwiftPM package traits)
 # kind: after | mode: package-build-run | toolchain: swift-6.2
-# started: 2026-11-17T13:46:23.242Z finished: 2026-11-17T13:46:26.796Z
+# started: 2026-11-17T14:00:29.680Z finished: 2026-11-17T14:00:33.030Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # expectations:
 #   expect: pass
 # ----
-$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift run --scratch-path /tmp/multica-task-193273389/smg-scratch-f14-traits-default-271883 F14Runner
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swift run --scratch-path /tmp/multica-task-2401711609/smg-scratch-f14-traits-default-299219 F14Runner
 # step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f14/pkg | exit: 0
 --- stdout ---
 describe=fast debug=quiet
@@ -18,12 +18,12 @@ Building for debugging...
 [4/9] Compiling Core Core.swift
 [5/9] Emitting module Core
 [6/10] Wrapping AST for Core for debugging
-[8/12] Compiling F14Runner main.swift
-[9/12] Emitting module F14Runner
+[8/12] Emitting module F14Runner
+[9/12] Compiling F14Runner main.swift
 [10/13] Wrapping AST for F14Runner for debugging
 [11/13] Write Objects.LinkFileList
 [12/13] Linking F14Runner
-Build of product 'F14Runner' complete! (2.88s)
+Build of product 'F14Runner' complete! (2.86s)
 
 --- end ---
 exit: 0

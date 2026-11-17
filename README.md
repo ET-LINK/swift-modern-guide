@@ -31,8 +31,9 @@ npm install
 bash scripts/fetch-toolchains.sh   # 下载并解压三套官方工具链到 .toolchains/（gitignore）
 npm run verify:samples             # 73 个样本全量验证（任何断言失败即非零退出）
 npm run verify:pilot               # 只跑 10 条试点特性（F01/F02/F03/F05/F07/F10/F20/F21/F29/F31）
-                                    # --only 运行会把结果“合并”进 results.json（保留未触碰样本），
-                                    # 不会破坏已提交的全量验证状态；交付口径仍要求一次全量运行全绿。
+                                    # --only 属「部分运行」：样本条目合并写入 results.json（未触碰样本保留），
+                                    # toolchains 与 lastFullRunAt（最近一次全量的时间）同样保留、不刷新；
+                                    # 验证总表会显式标注 partialRun。交付口径仍要求一次全量运行全绿。
 npm run build                      # 构建静态站（含把验证日志拷入 dist/logs）
 npm run preview                    # 本地起 dist（http://127.0.0.1:4173）
 npm run test:e2e                   # Playwright 浏览器自测

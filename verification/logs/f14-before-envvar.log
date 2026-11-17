@@ -1,7 +1,7 @@
 # sample: f14-before-envvar
 # feature: F14 (SwiftPM package traits)
 # kind: before | mode: run-swift | toolchain: swift-6.2
-# started: 2026-11-17T13:46:37.810Z finished: 2026-11-17T13:46:37.985Z
+# started: 2026-11-17T14:00:43.611Z finished: 2026-11-17T14:00:43.778Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f14/before.swift sha256=d310da65f8342aa7f6cf67790aeded4571a8f2c25563dd583674703878247b55
 # expectations:

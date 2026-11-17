@@ -19,11 +19,17 @@ const byId = new Map(features.map((f) => [f.data.id, f]));
 
 const totalSamples = manifest.features.reduce((n: number, f: any) => n + f.samples.length, 0);
 const failed = (results.results ?? []).filter((r: any) => r.status !== 'pass').length;
-const runAt = results.finishedAt;
+// 「最近一次完整验证」只取最后一次全量运行的时间；partial run 不刷新它
+const runAt = results.lastFullRunAt ?? results.finishedAt;
+const partialRun = results.partialRun ?? false;
+if (!runAt) {
+  throw new Error('verification: results.json 缺少 lastFullRunAt/finishedAt——请先跑一次全量 verify:samples');
+}
 const toolchainNote = manifest.toolchains
   .map((t: any) => {
     const m = /Swift version (\S+)/.exec(results.toolchains?.[t.id]?.version ?? '');
-    return `${t.id}（${m?.[1] ?? '?'}）`;
+    if (!m) throw new Error(`verification: results.json 缺少工具链 ${t.id} 的版本记录——请跑一次全量 verify:samples（partial run 不得丢失工具链状态）`);
+    return `${t.id}（${m[1]}）`;
   })
   .join('、');
 ---
@@ -36,6 +42,14 @@ const toolchainNote = manifest.toolchains
     <code>{runAt}</code>，工具链 {toolchainNote}，
     结果 <strong>{failed === 0 ? '全部通过' : `${failed} 个失败`}</strong>。
   </p>
+  {partialRun && Array.isArray(partialRun) && partialRun.length > 0 && (
+    <div class="callout warn">
+      <p>
+        当前验证记录含部分重跑（--only {partialRun.join(', ')}，{results.finishedAt}）：
+        上述样本状态按各样本最近一次运行结果展示，「最近一次完整验证」时间未更新。
+      </p>
+    </div>
+  )}
 
   <table class="ver-table">
     <thead>

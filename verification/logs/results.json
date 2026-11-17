@@ -1,5 +1,6 @@
 {
-  "finishedAt": "2026-11-17T13:46:56.298Z",
+  "finishedAt": "2026-11-17T14:00:59.303Z",
+  "lastFullRunAt": "2026-11-17T14:00:59.303Z",
   "partialRun": false,
   "toolchains": {
     "swift-6.2": {

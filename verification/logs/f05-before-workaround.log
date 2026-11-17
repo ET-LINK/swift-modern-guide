@@ -1,7 +1,7 @@
 # sample: f05-before-workaround
 # feature: F05 (Region-based isolation)
 # kind: before | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:46:16.940Z finished: 2026-11-17T13:46:17.017Z
+# started: 2026-11-17T14:00:23.959Z finished: 2026-11-17T14:00:24.036Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f05/before.swift sha256=bb660899afbc71170e9d8d2922058f1ce1c13e8983b536a899580252353de6c4
 # expectations:

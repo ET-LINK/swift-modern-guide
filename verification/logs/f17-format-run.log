@@ -1,7 +1,7 @@
 # sample: f17-format-run
 # feature: F17 (swift-format 随官方工具链分发)
 # kind: after | mode: format | toolchain: swift-6.2
-# started: 2026-11-17T13:46:44.955Z finished: 2026-11-17T13:46:44.984Z
+# started: 2026-11-17T14:00:49.505Z finished: 2026-11-17T14:00:49.527Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f17/before.swift sha256=3d2c2b5c61b10927cd425294ce20efc55127e97bc3eede91b6269815626c29d3
 # expectations:

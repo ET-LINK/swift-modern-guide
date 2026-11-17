@@ -1,7 +1,7 @@
 # sample: f04-after-typecheck
 # feature: F04 (Noncopyable generics)
 # kind: after | mode: typecheck | toolchain: swift-6.2
-# started: 2026-11-17T13:46:16.728Z finished: 2026-11-17T13:46:16.813Z
+# started: 2026-11-17T14:00:23.755Z finished: 2026-11-17T14:00:23.834Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f04/after.swift sha256=53a679ee719b127ca48aeaeea0609e9c0878698ce0aaf622d8851797de960ec7
 # expectations:

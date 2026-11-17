@@ -1,9 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
 const rawBase = import.meta.env.BASE_URL;
-const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+// 与 Base.astro 同一约定：base 不带尾斜杠，href 再补单斜杠（避免 /swift-modern-guide//）
+const base = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
 ---
 <Base title="404 · 页面不存在">
   <h1>404</h1>
-  <p>这个页面不存在。试试从 <a href={`${base}/`}>首页</a> 或 <a href={`${base}features/`}>全部特性</a> 找起，或者按 <kbd>/</kbd> 搜索。</p>
+  <p>这个页面不存在。试试从 <a href={`${base}/`}>首页</a> 或 <a href={`${base}/features/`}>全部特性</a> 找起，或者按 <kbd>/</kbd> 搜索。</p>
 </Base>

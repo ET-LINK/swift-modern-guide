@@ -1,7 +1,7 @@
 # sample: f07-broken-sharedvar-swift6
 # feature: F07 (Mutex 与 Synchronization)
 # kind: broken | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:46:18.493Z finished: 2026-11-17T13:46:18.582Z
+# started: 2026-11-17T14:00:25.509Z finished: 2026-11-17T14:00:25.605Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f07/before.swift sha256=76b882d00901888cd5c3d551d8711d0a256f9b88f2b4b34c8158c5998f27613a
 # expectations:

@@ -1,13 +1,13 @@
 # sample: f05-broken-alias-after-transfer
 # feature: F05 (Region-based isolation)
 # kind: broken | mode: compile6 | toolchain: swift-6.2
-# started: 2026-11-17T13:46:17.373Z finished: 2026-11-17T13:46:17.495Z
+# started: 2026-11-17T14:00:24.379Z finished: 2026-11-17T14:00:24.489Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f05/broken.swift sha256=8bf3be7cef6ffab2033b802b29df439ac57ca9316eccac6cbf4489576de8417f
 # expectations:
 #   expect: fail-with-diagnostic (diagnosticSubstring: "risks causing data races")
 # ----
-$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f05/broken.swift -o /tmp/multica-task-193273389/smg-f05-broken-alias-after-transfer-271883
+$ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/.toolchains/swift-6.2/usr/bin/swiftc -swift-version 6 /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide/examples/f05/broken.swift -o /tmp/multica-task-2401711609/smg-f05-broken-alias-after-transfer-299219
 # step 1 | cwd: /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322a60a/workdir/swift-modern-guide | exit: 1
 --- stdout ---
 (空)

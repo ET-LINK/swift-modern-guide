@@ -1,7 +1,7 @@
 # sample: f33-broken-composition
 # feature: F33 (Optional some / any 语法糖)
 # kind: broken | mode: typecheck | toolchain: swift-6.4.2
-# started: 2026-11-17T13:46:55.972Z finished: 2026-11-17T13:46:56.058Z
+# started: 2026-11-17T14:00:58.988Z finished: 2026-11-17T14:00:59.072Z
 # swift --version: Swift version 6.4.2 (swift-6.4.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f33/broken.swift sha256=ced4831a6dd78745d24c6869f0b70b10c6a61507fbba3cce85602b92a5daf3de
 # expectations:

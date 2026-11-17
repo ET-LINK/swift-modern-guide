@@ -1,7 +1,7 @@
 # sample: f26-exit-tests-run
 # feature: F26 (Swift Testing exit tests)
 # kind: after | mode: package-test | toolchain: swift-6.2
-# started: 2026-11-17T13:46:50.365Z finished: 2026-11-17T13:46:51.100Z
+# started: 2026-11-17T14:00:54.296Z finished: 2026-11-17T14:00:54.801Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # expectations:
 #   expect: pass
@@ -13,18 +13,18 @@ $ /home/XHORSE/like/multica_workspaces/polaris-1wv-e096f7ab1275/pola-68-11226322
 ↳ Testing Library Version: 6.2 (3fdabe5392108d8)
 ↳ Target Platform: x86_64-unknown-linux-gnu
 ◇ Test uncaughtErrorIsAlsoProcessFailure() started.
-◇ Test validTicketPassesCheck() started.
 ◇ Test badTicketTerminatesProcess() started.
+◇ Test validTicketPassesCheck() started.
 ✔ Test validTicketPassesCheck() passed after 0.001 seconds.
-✔ Test uncaughtErrorIsAlsoProcessFailure() passed after 0.017 seconds.
-✔ Test badTicketTerminatesProcess() passed after 0.017 seconds.
+✔ Test uncaughtErrorIsAlsoProcessFailure() passed after 0.015 seconds.
+✔ Test badTicketTerminatesProcess() passed after 0.016 seconds.
 ✔ Test run with 3 tests in 0 suites passed after 0.017 seconds.
 
 --- stderr ---
 [0/1] Planning build
 Building for debugging...
 [0/2] Write swift-version--7C7DF2BDD5441AFA.txt
-Build complete! (0.16s)
+Build complete! (0.15s)
 
 --- end ---
 exit: 0

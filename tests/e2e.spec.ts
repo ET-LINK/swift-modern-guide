@@ -230,18 +230,29 @@ test.describe('站内导航可点击（P0 门禁）', () => {
     ].map((href) => ({ sel: `.site-footer a[href="${href}"]`, label: `footer ${href}` })),
   ];
 
-  test('header/footer/brand 的 href 一律以 /swift-modern-guide 开头且可点开', async ({ page }) => {
-    await page.goto(`${BASE}/features/f02-typed-throws/`);
-    for (const t of navTargets) {
-      const el = page.locator(t.sel).first();
-      await expect(el, `缺少导航元素 ${t.label}`).toBeVisible();
-      const href = await el.getAttribute('href');
-      expect(href, `${t.label} 的 href 不能是 protocol-relative`).toMatch(/^\/swift-modern-guide(\/|$)/);
-      expect(href ?? '', `${t.label} 不允许 // 前缀`).not.toMatch(/^\/\//);
-      const resp = await page.request.get(href!);
-      expect(resp.status(), `${t.label} 应 200`).toBe(200);
-    }
-  });
+  // P3-C：首页、特征页、404 页三类起点都要过同一套导航断言，
+  // 不允许只有特征页被覆盖（404 是历史双斜杠残留的漏网点）。
+  const startPages = [
+    { name: '首页', url: `${BASE}/` },
+    { name: '特征页', url: `${BASE}/features/f02-typed-throws/` },
+    { name: '404页', url: `${BASE}/no-such-page/` },
+  ];
+
+  for (const start of startPages) {
+    test(`header/footer/brand href 合法且可点开（起点：${start.name}）`, async ({ page }) => {
+      await page.goto(start.url);
+      for (const t of navTargets) {
+        const el = page.locator(t.sel).first();
+        await expect(el, `缺少导航元素 ${t.label}（起点 ${start.name}）`).toBeVisible();
+        const href = await el.getAttribute('href');
+        expect(href, `${t.label} 的 href 不能是 protocol-relative`).toMatch(/^\/swift-modern-guide(\/|$)/);
+        expect(href ?? '', `${t.label} 不允许 // 前缀`).not.toMatch(/^\/\//);
+        expect(href ?? '', `${t.label} 不允许 base 后连续斜杠`).not.toMatch(/\/{2,}$/);
+        const resp = await page.request.get(href!);
+        expect(resp.status(), `${t.label} 应 200`).toBe(200);
+      }
+    });
+  }
 
   test('点击导航真实跳转（首页→迁移指南→验证总表）', async ({ page }) => {
     await page.goto(`${BASE}/`);
@@ -254,6 +265,23 @@ test.describe('站内导航可点击（P0 门禁）', () => {
     await page.click('.site-header .brand');
     await page.waitForURL(`**${BASE}/`);
     await expect(page.locator('h1')).toBeVisible();
+  });
+
+  test('404 页也能从错误导航离开：点「迁移指南」与首页链接均单斜杠可达', async ({ page }) => {
+    await page.goto(`${BASE}/no-such-page/`);
+    await expect(page.locator('h1')).toContainText('404');
+    // 404 页自带的两个出口链接（首页 / 全部特性）必须是单斜杠并 200
+    for (const text of ['首页', '全部特性']) {
+      const qa = page.locator('main a', { hasText: text }).first();
+      const href = await qa.getAttribute('href');
+      expect(href ?? '').not.toMatch(/\/\/|\/\/$/);
+      expect(href ?? '', `${text} 链接应为站内单斜杠路径`).toMatch(/^\/swift-modern-guide(\/|$)/);
+      const resp = await page.request.get(href!);
+      expect(resp.status()).toBe(200);
+    }
+    await page.click('.site-header .nav-links a[href*="/migration/"]');
+    await page.waitForURL(`**${BASE}/migration/**`);
+    await expect(page.locator('h1')).toContainText('实操顺序');
   });
 });
 
@@ -300,5 +328,18 @@ test.describe('F28 完整配置在页面可见（P2 门禁）', () => {
     const text = await pre.textContent();
     expect(text ?? '').toContain('"version"');
     expect(text ?? '').toContain('"fileScopedDeclarationPrivacy"');
+  });
+});
+
+test.describe('验证总表门禁（P2: --only 不得降级工具链状态）', () => {
+  test('页面显示三套真实工具链版本，禁止出现（?）占位', async ({ page }) => {
+    await page.goto(`${BASE}/verification/`);
+    const body = await page.locator('body').innerText();
+    expect(body, '不允许出现工具链版本占位符（?）——partial run 降级即红').not.toContain('（?）');
+    expect(body).toContain('swift-6.3.3');
+    expect(body).toContain('swift-6.4.2');
+    expect(body).toMatch(/swift-6\.2（6\.2）/);
+    expect(body).toMatch(/swift-6\.3\.3（6\.3\.3）/);
+    expect(body).toMatch(/swift-6\.4\.2（6\.4\.2）/);
   });
 });

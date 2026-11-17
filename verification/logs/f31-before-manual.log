@@ -1,7 +1,7 @@
 # sample: f31-before-manual
 # feature: F31 (defer 块中的 async 调用)
 # kind: before | mode: run-swift | toolchain: swift-6.4.2
-# started: 2026-11-17T13:46:54.218Z finished: 2026-11-17T13:46:54.362Z
+# started: 2026-11-17T14:00:57.304Z finished: 2026-11-17T14:00:57.446Z
 # swift --version: Swift version 6.4.2 (swift-6.4.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f31/before.swift sha256=ff41bd63f11d2505f4f1b9dbb9bb03b4400974392b7cafc044ee7bee2ce45cd6
 # expectations:

@@ -1,7 +1,7 @@
 # sample: f03-before-run
 # feature: F03 (Noncopyable structs/enums、~Copyable 与所有权)
 # kind: before | mode: run-swift | toolchain: swift-6.2
-# started: 2026-11-17T13:46:15.992Z finished: 2026-11-17T13:46:16.116Z
+# started: 2026-11-17T14:00:22.990Z finished: 2026-11-17T14:00:23.110Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f03/before.swift sha256=c53930957b473d2b297adcf91234dd9104d4af873d9add5727a15c583ce4d982
 # expectations:

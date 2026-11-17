@@ -1,7 +1,7 @@
 # sample: f30-emit-module-a
 # feature: F30 (Module selectors（Module::api）)
 # kind: prep | mode: emit-module | toolchain: swift-6.3.3
-# started: 2026-11-17T13:46:53.179Z finished: 2026-11-17T13:46:53.305Z
+# started: 2026-11-17T14:00:56.415Z finished: 2026-11-17T14:00:56.525Z
 # swift --version: Swift version 6.3.3 (swift-6.3.3-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f30/ModuleA.swift sha256=2b4931394ad2ace7edce2cde1f3a0991be06d22576a2dd30def78d12b5f4ca64
 # expectations:

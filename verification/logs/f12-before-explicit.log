@@ -1,7 +1,7 @@
 # sample: f12-before-explicit
 # feature: F12 (Task group 子任务结果类型推断)
 # kind: before | mode: typecheck6 | toolchain: swift-6.2
-# started: 2026-11-17T13:46:22.636Z finished: 2026-11-17T13:46:22.714Z
+# started: 2026-11-17T14:00:29.051Z finished: 2026-11-17T14:00:29.131Z
 # swift --version: Swift version 6.2 (swift-6.2-RELEASE) | Target: x86_64-unknown-linux-gnu
 # input: examples/f12/before.swift sha256=ade134f3883d66446044123763604474708cb4c04cbc701fd420519ec936aeca
 # expectations:
