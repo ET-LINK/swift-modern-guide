@@ -37,6 +37,14 @@ jobs:
         run: bash scripts/fetch-toolchains.sh
       - name: 示例验证（全部样本，负例需带诊断失败）
         run: npm run verify:samples
+      - name: 诊断（仅失败时）：SwiftPM 在 runner 上的真实报错
+        if: failure()
+        run: |
+          export PATH="$PWD/.toolchains/swift-6.2/usr/bin:$PATH"
+          echo "== which swift: $(command -v swift)"
+          swift --version || true
+          echo "== swift build 输出（examples/f08/pkg）"
+          cd examples/f08/pkg && swift build -v 2>&1 | tail -40 || true
       - name: 内容一致性检查
         run: npm run check:content
 
