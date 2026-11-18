@@ -31,7 +31,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq binutils libc6-dev libcurl4-openssl-dev libedit2 \
-            libgcc-13-dev libpython3-dev libsqlite3-0 libstdc++-13-dev libxml2 libxml2-dev \
+            libgcc-13-dev libpython3-dev libsqlite3-0 libstdc++-13-dev libxml2t64 libxml2-dev \
             libncurses6 libtinfo6 libz3-dev pkg-config tzdata zlib1g-dev
           sudo ldconfig
       - name: 安装三套 Swift 工具链（6.2 / 6.3.3 / 6.4.2）
