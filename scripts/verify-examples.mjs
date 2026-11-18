@@ -193,6 +193,9 @@ function verifySample(sample, feature) {
       encoding: 'utf8',
       cwd: step.cwd ?? REPO,
       maxBuffer: 64 * 1024 * 1024,
+      // SwiftPM 的 swift build / swift test 会再从 PATH 找 swiftc、swift-build 等驱动，
+      // 干净 CI 上没有系统 Swift：必须把当前工具链的 bin 前置，否则 package-* 样本 exit 127。
+      env: { ...process.env, PATH: `${tc.bin}:${process.env.PATH ?? ''}` },
     });
     const ended = fmtDate();
     const stepInfo = {
