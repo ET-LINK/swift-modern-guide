@@ -44,6 +44,14 @@ jobs:
           export PATH="$PWD/.toolchains/swift-6.2/usr/bin:$PATH"
           echo "== which swift: $(command -v swift)"
           swift --version || true
+          echo "== 系统信息: $(lsb_release -ds 2>/dev/null || cat /etc/os-release | head -2)"
+          echo "== libxml2 包与文件"
+          (dpkg -l | grep -i libxml2 || true)
+          (ls -l /usr/lib/x86_64-linux-gnu/libxml2* || true)
+          echo "== ldd swift-build 缺失项"
+          (ldd .toolchains/swift-6.2/usr/bin/swift-build | grep -i 'not found' || echo '无缺失')
+          echo "== apt 候选"
+          (apt-cache policy libxml2 libxml2t64 libxml2-dev 2>/dev/null | head -20 || true)
           echo "== swift build 输出（examples/f08/pkg）"
           cd examples/f08/pkg && swift build -v 2>&1 | tail -40 || true
       - name: 内容一致性检查
